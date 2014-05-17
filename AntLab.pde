@@ -3,12 +3,12 @@ Cell[][] grid;
 Cell[][] buffergrid;
 
 // Number of columns and rows in the grid
-int cols = 20;
-int rows = 20;
+int cols = 40;
+int rows = 40;
 int r;
 
 void setup() {
-  size(400,400);
+  size(800,800);
   frameRate(4);
   grid = new Cell[cols][rows];
   buffergrid = new Cell[cols][rows];
@@ -149,8 +149,51 @@ class Cell {
   }
   
   void algo1(){
-    u[1] = int(random(4));
+    u[1]--;
+    if(u[1]<0){u[1]=3;}
     turn();
+    if(buffergrid[i][j].typ != 3){
+      u[1]++;
+      if(u[1] >3){u[1]-=4;}
+      turn();
+      if(buffergrid[i][j].typ != 3){
+        u[1]++;
+        if(u[1] >3){u[1]-=4;}
+        turn();
+        if(buffergrid[i][j].typ != 3){
+          u[1]++;
+          if(u[1] >3){u[1]-=4;}
+          turn();
+          if(buffergrid[i][j].typ != 3){
+            u[1] += 1+int(random(3));
+            //u[1]++;
+            if(u[1]>3){u[1]-=4;}
+            turn();
+            if(buffergrid[i][j].typ == 1){
+              u[1]++;
+              if(u[1] >3){u[1]-=4;}
+              turn();
+              if(buffergrid[i][j].typ == 1){
+                u[1]++;
+                if(u[1] >3){u[1]-=4;}
+                turn();
+                if(buffergrid[i][j].typ == 1){
+                  u[1]++;
+                  if(u[1] >3){u[1]-=4;}
+                  turn();
+                  if(buffergrid[i][j].typ == 1){
+                    u[1] += 1+int(random(3));
+                    //u[1] += 2;
+                    if(u[1] >3){u[1]-=4;}
+                    turn();
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
     switch(buffergrid[i][j].typ){
       case 0:
         if(health>100){create();}
@@ -183,7 +226,8 @@ class Cell {
           if(u[1] >3){u[1]-=4;}
           turn();
           if(buffergrid[i][j].typ != 3){
-            u[1] += int(random(3))+1;
+            u[1] += 1+int(random(3));
+            //u[1] += 2;
             if(u[1] >3){u[1]-=4;}
             turn();
           }
@@ -193,7 +237,7 @@ class Cell {
     switch(buffergrid[i][j].typ){
       case 0:
         if(health>100){create();}
-        //else if(health<20 && health >5){create();}
+        else if(health<20 && health >5){create();}
         else {move();}
         break;
       case 2:
@@ -236,6 +280,6 @@ class Cell {
   void display() {
     stroke(255);
     if(typ == 2){fill(team[u[0]]);} else {fill(c[typ]);}
-    rect(x*20,y*20,width/cols,height/rows); 
+    rect(x*width/cols,y*width/cols,width/cols,height/rows); 
   }
 }
