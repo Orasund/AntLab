@@ -78,6 +78,44 @@ class Cell
     return colors[int(c[0])][int(c[1])][int(c[2])];
   }
 
+  void turnRight()
+  {
+    d = (d+1)%4;
+  }
+  
+  void turnLeft()
+  {
+    d = (d+3)%4;
+  }
+
+  void chanceFromOrganism(Organism life)
+  {
+    d = life.dir;
+    c[0] = life.c[0];
+    c[1] = life.c[1];
+    c[2] = life.c[2];
+    type = 2;//life.type;
+    health = life.health;
+  }
+
+  void chanceToLife(int x, int y,Cell[][] buffergrid)
+  {
+    d = buffergrid[x][y].getDir();
+    c = buffergrid[x][y].getColor();
+    type = buffergrid[x][y].getType();
+    health = buffergrid[x][y].getHealth();
+  }
+
+  void chanceToAir()
+  {
+    d = 0;
+    c[0] = true;
+    c[1] = true;
+    c[2] = true;
+    type = 0;
+    health = 100;
+  }
+
   void display(int x, int y, int size)
   {
     fill(generateColor());
@@ -102,6 +140,8 @@ class Cell
   }
   
   public int getDir(){return d;}
+  public int getType(){return type;}
+  public int getHealth(){return health;}
 }
 
 /*

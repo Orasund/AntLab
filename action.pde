@@ -1,12 +1,27 @@
 void action(int x, int y)
 {
-  switch(cell[x][y].type)
+  switch(map.getType(x,y))
+  //buffergrid[x][y].type)
   {
     case 1:
       break;
     case 2:
-      int[][] sight = getSight(int x, int y);
-      Ant.getAction(sight,cell[x][y])
+      //ant.createFromCell(x, y);//,buffergrid);
+      //int a = ant.getAction();
+      Organism ant = map.getOrganism(x,y);
+      int a = getAction(ant);
+      switch(a)
+      {
+        case 2: //turn Right
+          turnRight(x,y);//,buffergrid);
+          break;
+        case 1: //Walk
+          walk(x,y);//,buffergrid);
+          break;
+        case 0:
+        default:
+          break;
+      }
       break;
     case 0:
     default:
@@ -14,19 +29,40 @@ void action(int x, int y)
   }
 }
 
-/*
-* returns: [mid,left,right]
-*/
-int[][] getSight(int x, int y)
+/*void turnRight(int x, int y,Cell[][] buffergrid)
 {
-  int[][] eyes = {{0,-1},{-1,-2},{1,-2}}
-  int[] pos = new int[2];
-  int[][] out = new int[4][3];
-  for(int i=0;i<4;i++)
-  {
-    pos[0] = (eyes[i][0]+cols+x)%cols;
-    pos[1] = (eyes[i][1]+rows+y)%rows;
-    out[i] = grid[pos[0]][pos[1]].getColor();
-  }
-  return out;
+  turnRight(x,y);
+}
+
+void turnLeft(int x, int y,Cell[][] buffergid)
+{
+  turnLeft(x,y);
+}*/
+
+void turnRight(int x, int y)
+{
+  Organism ant = map.getOrganism(x,y);
+  ant.dir = (ant.dir+1)%4;
+  map.setOrganism(x,y,ant);
+  //grid[x][y].turnRight();
+}
+
+void turnLeft(int x, int y)
+{
+  Organism ant = map.getOrganism(x,y);
+  ant.dir = (ant.dir+3)%4;
+  map.setOrganism(x,y,ant);
+  //grid[x][y].turnLeft();
+}
+
+void walk(int x, int y)//,Cell[][] buffergrid)
+{
+  int directions[][] = {{0,-1},{1,0},{0,1},{-1,0}};
+  int dir = map.getOrganism(x,y).dir;
+  //int dir = buffergrid[x][y].getDir();
+  int temp_x = (x+directions[dir][0]+cols)%cols;
+  int temp_y = (y+directions[dir][1]+rows)%rows;
+  map.move(x,y,temp_x,temp_y);
+  //grid[temp_x][temp_y].chanceToLife(x,y,buffergrid);
+  //grid[x][y].chanceToAir();
 }

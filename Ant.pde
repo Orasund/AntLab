@@ -1,10 +1,20 @@
-class Ant
+/*class Ant extends Organism
 {
-  int x;
-  int y;
-  Ant(int x_, int y_)
+  Ant()
   {
-    int x = x_;
-    int y = y_;
+    super();
   }
-}
+
+  int getAction()
+  {
+    if(isWall(sight[0])==false)
+      return walk;
+    else
+      return turn_r;
+  }
+
+  boolean isWall(boolean[] c_)
+  {
+    return (c_[0] == false && c_[1] == false && c_[2] == false);
+  }
+}*/
