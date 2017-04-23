@@ -35,7 +35,7 @@ class Map
 
   Organism getOrganism(int x, int y)
   {
-    Organism out = new Organism(x, y,grid);
+    Organism out = new Organism(x, y, grid);
     //out.createFromCell(x, y,grid);
     return out;
   }
@@ -80,10 +80,20 @@ class Map
       {
         buffer[i][j].display(i,j,S);
       }
+
     for (int i = 0; i < cols; i++)
       for (int j = 0; j < rows; j++)
       {
         grid[i][j].display(i,j,S/2);
+      }
+
+    for (int i = 0; i < cols; i++)
+      for (int j = 0; j < rows; j++)
+      {
+        if(buffer[i][j].getType() != 2)
+          continue;
+
+        buffer[i][j].displayEye(i,j,S/4);
       }
   }
 }

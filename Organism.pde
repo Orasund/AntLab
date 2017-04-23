@@ -40,9 +40,10 @@ class Organism
   void createFromCell(int x, int y,Cell[][] buffergrid)
   {
     c = buffergrid[x][y].getColor();
-    sight = getSight(x,y,buffergrid);
     health = buffergrid[x][y].getHealth();
     dir = buffergrid[x][y].getDir();
+    sight = getSight(x,y,buffergrid);
+
   }
 
   /*
@@ -68,13 +69,16 @@ class Organism
         {-1,0}
       }
     };
-    int[][] eyes = {{0,-1},{-1,-2},{1,-2}};
+    
+    int[][] eyes = {{0,-1},{-1,-1},{1,-1}};
     int[] pos = new int[2];
     boolean[][] out = new boolean[4][3];
     for(int i=0;i<eyes.length;i++)
     {
-      pos[0] = (eyes[i][0]+x*mat[dir][0][0]+y*mat[dir][0][1]+2*cols)%cols;
-      pos[1] = (eyes[i][1]+x*mat[dir][1][0]+y*mat[dir][1][1]+2*rows)%rows;
+      int rel_x = eyes[i][0]*mat[floor(dir/2)][0][0]+eyes[i][1]*mat[floor(dir/2)][0][1];
+      pos[0] = (x+rel_x+cols)%cols;
+      int rel_y = eyes[i][0]*mat[floor(dir/2)][1][0]+eyes[i][1]*mat[floor(dir/2)][1][1];
+      pos[1] = (y+rel_y+rows)%rows;
       out[i] = buffergrid[pos[0]][pos[1]].getColor();
     }
     return out;

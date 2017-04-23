@@ -42,7 +42,7 @@ void turnLeft(int x, int y,Cell[][] buffergid)
 void turnRight(int x, int y)
 {
   Organism ant = map.getOrganism(x,y);
-  ant.dir = (ant.dir+1)%4;
+  ant.dir = (ant.dir+2)%8;
   map.setOrganism(x,y,ant);
   //grid[x][y].turnRight();
 }
@@ -50,7 +50,7 @@ void turnRight(int x, int y)
 void turnLeft(int x, int y)
 {
   Organism ant = map.getOrganism(x,y);
-  ant.dir = (ant.dir+3)%4;
+  ant.dir = (ant.dir+6)%8;
   map.setOrganism(x,y,ant);
   //grid[x][y].turnLeft();
 }
@@ -58,7 +58,7 @@ void turnLeft(int x, int y)
 void walk(int x, int y)//,Cell[][] buffergrid)
 {
   int directions[][] = {{0,-1},{1,0},{0,1},{-1,0}};
-  int dir = map.getOrganism(x,y).dir;
+  int dir = floor(map.getOrganism(x,y).dir/2);
   //int dir = buffergrid[x][y].getDir();
   int temp_x = (x+directions[dir][0]+cols)%cols;
   int temp_y = (y+directions[dir][1]+rows)%rows;
