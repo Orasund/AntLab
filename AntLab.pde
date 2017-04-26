@@ -43,8 +43,11 @@ void setup() {
 
 void draw() {
   try
+  {
     currentWorld.draw();
-  catch (Exception e) {
+  }
+  catch (Exception e)
+  {
     println(e.getMessage());
     e.printStackTrace();
   }
