@@ -9,7 +9,7 @@ class TemplateWorld extends World
     super(portIn, portOut);
   }
   
-  private HShape createSquareShape(int x, int y, int cols, int rows)
+  private HRectangle createSquareShape(int x, int y, int cols, int rows)
   {
     check(
       (cols > 0) &&
@@ -39,10 +39,16 @@ class TemplateWorld extends World
     for(int i = 0; i < cols; i++)
       for(int j = 0 ; j < rows; j++)
       {
-        boolean c[] = new boolean[3];
+        boolean c1[] = new boolean[3];
+        boolean c2[] = new boolean[3];
         for(int k = 0; k < 3; k++)
-          c[k] = boolean(floor(random(2)));
-        register(new Square(c,createSquareShape(i, j, cols, rows)));
+        {
+          c1[k] = boolean(floor(random(2)));
+          c2[k] = boolean(floor(random(2)));
+        }
+          
+        HRectangle shape = createSquareShape(i, j, cols, rows);
+        register(new Square(shape,c1,c2,shape.getWidth()));
       }
   }
 }

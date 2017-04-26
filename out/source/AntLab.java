@@ -64,20 +64,161 @@ public void setup() {
 }
 
 public void draw() {
-  currentWorld.draw();
+  try
+  {
+    currentWorld.draw();
+  }
+  catch (Exception e)
+  {
+    println(e.getMessage());
+    e.printStackTrace();
+  }
+}
+/**
+ * Square
+ * the Square is part of the gameboard
+ */
+class Square extends Being
+{ 
+  boolean[] _background_color;
+  boolean[] _dot_color;
+  boolean _is_dot_visible;
+  float _size;
+  
+  Square(HShape shape, boolean[] b_c, boolean[] d_c, float size)
+  {
+    super(shape);
+    _background_color = new boolean[]{b_c[0],b_c[1],b_c[2]};
+    _dot_color = new boolean[]{d_c[0],d_c[1],d_c[2]};
+    _is_dot_visible = true;
+    _size = size;
+  }
+
+  public void update() {
+    // Add update method here
+  }
+
+  private int generateColor(boolean c[])
+  {
+    int[][][] colors = 
+    {
+      {//RED = FALSE
+        {color(0,0,0),color(0,0,255)},//GREEN = FALSE
+        {color(0,255,0),color(0,255,255)}
+      },
+      {
+        {color(255,0,0),color(255,0,255)},//GREEN = FALSE
+        {color(255,255,0),color(255,255,255)}
+      }
+    };
+
+    return colors[PApplet.parseInt(c[0])][PApplet.parseInt(c[1])][PApplet.parseInt(c[2])];
+  }
+
+  public void draw()
+  {
+		noStroke();
+    fill(generateColor(_background_color));
+		_shape.draw();
+    fill(generateColor(_dot_color));
+    rect(_size/4,_size/4,_size/2,_size/2);
+  }
+}
+/**
+ * Template being
+ */
+class TemplateBeing extends Being {
+  TemplateBeing(HShape shape) {
+    super(shape);
+    //Add your constructor info here
+  }
+
+  public void update() {
+    // Add update method here
+  }
+
+  public void draw() {
+    // Add your draw method here
+  }
+}
+/**
+ * Template interactor between a TemplateBeing and another TemplateBeing
+ * Don't forget to change TemplateBeing-s to
+ * the names of the Being-types you want to interact
+ */
+class TemplateInteractor extends Interactor<TemplateBeing, TemplateBeing> {
+  TemplateInteractor() {
+    super();
+    //Add your constructor info here
+  }
+
+  public boolean detect(TemplateBeing being1, TemplateBeing being2) {
+    //Add your detect method here
+    return true;
+  }
+
+  public void handle(TemplateBeing being1, TemplateBeing being2) {
+    //Add your handle method here
+  }
 }
 /**
  * Template World
  * You'll need to add stuff to setup().
  */
-class TemplateWorld extends World {
-  TemplateWorld(int portIn, int portOut) {
+class TemplateWorld extends World
+{
+  TemplateWorld(int portIn, int portOut)
+  {
     super(portIn, portOut);
   }
+  
+  private HRectangle createSquareShape(int x, int y, int cols, int rows)
+  {
+    check(
+      (cols > 0) &&
+      (rows > 0) &&
+      (x >= 0 && x<cols) &&
+      (y >= 0 && y<rows)
+    );
 
-  public void setup() {
-    //IMPORTANT: put all other setup here
+    int size = min(WINDOW_WIDTH/cols,WINDOW_HEIGHT/rows);
+    int offset_x = (WINDOW_WIDTH-size*cols)/2;
+    int offset_y = (WINDOW_HEIGHT-size*rows)/2;
+    int pos_x = size*x;
+    int pos_y = size*y;
+
+    check(
+      (abs(offset_x*2 + size*cols - WINDOW_WIDTH) < 1) &&
+      (abs(offset_y*2 + size*rows - WINDOW_HEIGHT) < 1)
+    );
+
+    return new HRectangle(offset_x+pos_x, offset_y+pos_y, size, size);
   }
+
+  public void setup()
+  {
+    int cols = 14;
+    int rows = 10;
+    for(int i = 0; i < cols; i++)
+      for(int j = 0 ; j < rows; j++)
+      {
+        boolean c1[] = new boolean[3];
+        boolean c2[] = new boolean[3];
+        for(int k = 0; k < 3; k++)
+        {
+          c1[k] = PApplet.parseBoolean(floor(random(2)));
+          c2[k] = PApplet.parseBoolean(floor(random(2)));
+        }
+          
+        HRectangle shape = createSquareShape(i, j, cols, rows);
+        register(new Square(shape,c1,c2,shape.getWidth()));
+      }
+  }
+}
+public void check(boolean argument)
+{
+  if(argument == false)
+    throw new RuntimeException("CheckingError");
 }
   public void settings() {  size(600, 600); }
   static public void main(String[] passedArgs) {
