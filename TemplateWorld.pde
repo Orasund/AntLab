@@ -24,8 +24,12 @@ class TemplateWorld extends World
     int pos_x = size*x;
     int pos_y = size*y;
 
-    HShape shape = new HRectangle(offset_x+pos_x, offset_y+pos_y, size, size);
-    return shape;
+    check(
+      (abs(offset_x*2 + size*cols - WINDOW_WIDTH) < 1) &&
+      (abs(offset_y*2 + size*rows - WINDOW_HEIGHT) < 1)
+    );
+
+    return new HRectangle(offset_x+pos_x, offset_y+pos_y, size, size);
   }
 
   void setup()
