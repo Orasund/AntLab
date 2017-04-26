@@ -42,5 +42,10 @@ void setup() {
 }
 
 void draw() {
-  currentWorld.draw();
+  try
+    currentWorld.draw();
+  catch (Exception e) {
+    println(e.getMessage());
+    e.printStackTrace();
+  }
 }
