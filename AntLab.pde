@@ -1,49 +1,46 @@
-// 2D Array of objects
-//Cell[][] grid;
-Map map;
+/**
+ * A template to get you started
+ * Define your beings, groups, interactors and worlds in separate tabs
+ * Put the pieces together in this top-level file!
+ */
 
-// Number of columns and rows in the grid
-int cols = 40;
-int rows = 40;
-int H,W;  //height, Width
-int S; //Size of a Cell
-int r; //random
+import hermes.*;
+import hermes.hshape.*;
+import hermes.animation.*;
+import hermes.physics.*;
+import hermes.postoffice.*;
 
-void setup()
-{
-  size(800,800);
-  frameRate(4);
-  noStroke();
+///////////////////////////////////////////////////
+// CONSTANTS
+///////////////////////////////////////////////////
+/**
+ * Constants should go up here
+ * Making more things constants makes them easier to adjust and play with!
+ */
+static int WINDOW_WIDTH;// = 600;
+static int WINDOW_HEIGHT; //= 600;
+static final int PORT_IN = 8080;
+static final int PORT_OUT = 8000; 
 
-  H = height;
-  W = width;
-  S = max(H/cols,W/rows);
-  
-  map = new Map(cols,rows);
+World currentWorld;
 
-  /*grid = new Cell[cols][rows];
-  for (int i = 0; i < cols; i++) {
-    for (int j = 0; j < rows; j++) {
-      grid[i][j] = new Cell();
-    }
-  }*/
+///////////////////////////////////////////////////
+// PAPPLET
+///////////////////////////////////////////////////
+
+void setup() {
+  size(600, 600);
+  WINDOW_WIDTH = width;
+  WINDOW_HEIGHT = height;
+  Hermes.setPApplet(this);
+
+  currentWorld = new TemplateWorld(PORT_IN, PORT_OUT);       
+
+  //Important: don't forget to add setup to TemplateWorld!
+
+  currentWorld.start(); // this should be the last line in setup() method
 }
 
 void draw() {
-  background(0);
-
-  map.update();
-
-  //Cell[][] buffergrid = new Cell[cols][rows];
-  /*for (int i = 0; i < cols; i++)
-    for (int j = 0; j < rows; j++)
-      buffergrid[i][j] = grid[i][j].copy();*/
-  
-  //Ant ant = new Ant();
-  for (int i = 0; i < cols; i++)
-    for (int j = 0; j < rows; j++)
-      action(i,j);//,ant);//,buffergrid);
-
-  map.display();
-  //render(buffergrid);
+  currentWorld.draw();
 }
