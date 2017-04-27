@@ -34,9 +34,7 @@ void setup() {
   WINDOW_HEIGHT = height;
   Hermes.setPApplet(this);
 
-  currentWorld = new TemplateWorld(PORT_IN, PORT_OUT);       
-
-  //Important: don't forget to add setup to TemplateWorld!
+  currentWorld = new MapWorld(PORT_IN, PORT_OUT);       
 
   currentWorld.start(); // this should be the last line in setup() method
 }

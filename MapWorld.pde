@@ -1,10 +1,10 @@
 /**
- * Template World
+ * MapWorld
  * You'll need to add stuff to setup().
  */
-class TemplateWorld extends World
+class MapWorld extends World
 {
-  TemplateWorld(int portIn, int portOut)
+  MapWorld(int portIn, int portOut)
   {
     super(portIn, portOut);
   }

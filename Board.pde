@@ -5,16 +5,31 @@
 class Board extends Group<Square>
 {
 
-  Board(World w, int cols, int rows) {
+  Board(World w, int cols, int rows)
+  {
     super(w);
 
     for(int i = 0; i < cols; i++)
       for(int j = 0 ; j < rows; j++)
       {
-        boolean c[] = new boolean[3];
-        for(int k = 0; k < 3; k++)
+        boolean c[] = new boolean[]{true,true,true};
+        switch(floor(random(6)))
         {
-          c[k] = boolean(floor(random(2)));
+          case 0: //Ant
+            c[floor(random(3))] = false;
+            int r = floor(random(2));
+            if(c[r] == false)
+              r++;
+            c[r] = false;
+            break;
+          case 1: //Wall
+          case 2:
+            c[0] = false;
+            c[1] = false;
+            c[2] = false;
+            break;
+          default://Air
+            break;
         }
           
         HRectangle shape = createSquareShape(i, j, cols, rows);

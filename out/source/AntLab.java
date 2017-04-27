@@ -56,9 +56,7 @@ public void setup() {
   WINDOW_HEIGHT = height;
   Hermes.setPApplet(this);
 
-  currentWorld = new TemplateWorld(PORT_IN, PORT_OUT);       
-
-  //Important: don't forget to add setup to TemplateWorld!
+  currentWorld = new MapWorld(PORT_IN, PORT_OUT);       
 
   currentWorld.start(); // this should be the last line in setup() method
 }
@@ -81,16 +79,31 @@ public void draw() {
 class Board extends Group<Square>
 {
 
-  Board(World w, int cols, int rows) {
+  Board(World w, int cols, int rows)
+  {
     super(w);
 
     for(int i = 0; i < cols; i++)
       for(int j = 0 ; j < rows; j++)
       {
-        boolean c[] = new boolean[3];
-        for(int k = 0; k < 3; k++)
+        boolean c[] = new boolean[]{true,true,true};
+        switch(floor(random(6)))
         {
-          c[k] = PApplet.parseBoolean(floor(random(2)));
+          case 0: //Ant
+            c[floor(random(3))] = false;
+            int r = floor(random(2));
+            if(c[r] == false)
+              r++;
+            c[r] = false;
+            break;
+          case 1: //Wall
+          case 2:
+            c[0] = false;
+            c[1] = false;
+            c[2] = false;
+            break;
+          default://Air
+            break;
         }
           
         HRectangle shape = createSquareShape(i, j, cols, rows);
@@ -128,18 +141,39 @@ class Board extends Group<Square>
   }
 }
 /**
+ * MapWorld
+ * You'll need to add stuff to setup().
+ */
+class MapWorld extends World
+{
+  MapWorld(int portIn, int portOut)
+  {
+    super(portIn, portOut);
+  }
+
+  public void setup()
+  {
+    int cols = 20;
+    int rows = 20;
+    Board board = new Board(this,cols,rows);
+    register(board);
+    ShadowSquareGroup shadowSquareGroup = new ShadowSquareGroup(this,cols,rows);
+    register(shadowSquareGroup);
+  }
+}
+/**
  * Square
  * the Square is part of the gameboard
  */
 class Square extends Being
 { 
-  boolean[] _background_color;
+  boolean[] _c;
   float _size;
   
   Square(HShape shape, boolean[] b_c, float size)
   {
     super(shape);
-    _background_color = new boolean[]{b_c[0],b_c[1],b_c[2]};
+    _c = new boolean[]{b_c[0],b_c[1],b_c[2]};
     _size = size;
   }
 
@@ -150,7 +184,7 @@ class Square extends Being
   public void draw()
   {
 		noStroke();
-    fill(generateColor(_background_color));
+    fill(generateColor(_c));
 		_shape.draw();
   }
 }
@@ -176,40 +210,23 @@ class TemplateBeing extends Being {
  * Don't forget to change TemplateBeing-s to
  * the names of the Being-types you want to interact
  */
-class TemplateInteractor extends Interactor<TemplateBeing, TemplateBeing> {
-  TemplateInteractor() {
+class TemplateInteractor extends Interactor<Square, Square>
+{
+  TemplateInteractor()
+  {
     super();
     //Add your constructor info here
   }
 
-  public boolean detect(TemplateBeing being1, TemplateBeing being2) {
+  public boolean detect(Square being1, Square being2)
+  {
     //Add your detect method here
     return true;
   }
 
-  public void handle(TemplateBeing being1, TemplateBeing being2) {
+  public void handle(Square being1, Square being2)
+  {
     //Add your handle method here
-  }
-}
-/**
- * Template World
- * You'll need to add stuff to setup().
- */
-class TemplateWorld extends World
-{
-  TemplateWorld(int portIn, int portOut)
-  {
-    super(portIn, portOut);
-  }
-
-  public void setup()
-  {
-    int cols = 20;
-    int rows = 20;
-    Board board = new Board(this,cols,rows);
-    register(board);
-    ShadowSquareGroup shadowSquareGroup = new ShadowSquareGroup(this,cols,rows);
-    register(shadowSquareGroup);
   }
 }
 public void check(boolean argument)
