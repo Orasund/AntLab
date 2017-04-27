@@ -4,22 +4,53 @@
 class ShadowSquareGroup extends Group<ShadowSquare>
 {
 
-  ShadowSquareGroup(World w, int cols, int rows) {
+  ShadowSquareGroup(World w, Board board) {
     super(w);
+
+    int[][] grid = board.getGrid();
+    int cols = grid.length;
+    int rows = grid[0].length;
 
     for(int i = 0; i < cols; i++)
       for(int j = 0 ; j < rows; j++)
       {
-        boolean c[] = new boolean[3];
-        for(int k = 0; k < 3; k++)
+        if(grid[i][j] != 2) //Ant
+          continue;
+
+        int[][] dir = {{0,-1},{1,0},{0,1},{-1,0}};
+        
+        /* finding empty spot */
+        int x = i;
+        int y = j;
+        for(int k = 0; k < 4; k++)
         {
-          c[k] = boolean(floor(random(2)));
+          int r = floor(random(4));
+          int temp_x = (i + dir[r][0] + cols)%cols;
+          int temp_y = (j + dir[r][1] + rows)%rows;
+
+          int temp = grid[temp_x][temp_y];
+          if(temp != 1) //Wall
+          {
+            x = temp_x;
+            y = temp_y;
+            break;
+          }
         }
+
+        if(x == i && y == j)
+          continue;
+        
+        boolean c[] = new boolean[]{true,true,true};
+        c[floor(random(3))] = false;
+        int r = floor(random(2));
+        if(c[r] == false)
+          r++;
+        c[r] = false;
           
-        HRectangle shape = createSquareShape(i, j, cols, rows);
-        ShadowSquare sh = new ShadowSquare(shape,c,shape.getWidth());
-        w.register(sh);
-        add(sh);
+        HRectangle shape = createSquareShape(x, y, cols, rows);
+        ShadowSquare s = new ShadowSquare(shape,c,shape.getWidth());
+        w.register(s);
+        add(s);
       }
   }
 
@@ -48,5 +79,6 @@ class ShadowSquareGroup extends Group<ShadowSquare>
 
   public void update()
   {
+    beings_counter += size();
   }
 }

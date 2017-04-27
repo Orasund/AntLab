@@ -42,7 +42,9 @@ public class AntLab extends PApplet {
 static int WINDOW_WIDTH;// = 600;
 static int WINDOW_HEIGHT; //= 600;
 static final int PORT_IN = 8080;
-static final int PORT_OUT = 8000; 
+static final int PORT_OUT = 8000;
+
+int beings_counter = 0;
 
 World currentWorld;
 
@@ -72,72 +74,90 @@ public void draw() {
     e.printStackTrace();
   }
 }
-/**
- * Board
- * the playing board
- */
-class Board extends Group<Square>
+class Board
 {
+  int[][] _grid;
+  int[][] _buffer;
+  int _cols;
+  int _rows;
 
-  Board(World w, int cols, int rows)
+  Board(int cols, int rows)
   {
-    super(w);
+    _grid = new int[cols][rows];
+    _buffer = new int[cols][rows];
+    _cols = cols;
+    _rows = rows;
 
-    for(int i = 0; i < cols; i++)
-      for(int j = 0 ; j < rows; j++)
+    generateGrid();
+  }
+
+  private void generateGrid()
+  {
+    for(int i = 0; i < _cols; i++)
+      for(int j = 0; j < _rows; j++)
       {
-        boolean c[] = new boolean[]{true,true,true};
+        int type = 0;
+
         switch(floor(random(6)))
         {
           case 0: //Ant
-            c[floor(random(3))] = false;
-            int r = floor(random(2));
-            if(c[r] == false)
-              r++;
-            c[r] = false;
+            type = 2;
             break;
           case 1: //Wall
           case 2:
-            c[0] = false;
-            c[1] = false;
-            c[2] = false;
+            type = 1;
             break;
           default://Air
             break;
         }
-          
-        HRectangle shape = createSquareShape(i, j, cols, rows);
-        Square s = new Square(shape,c,shape.getWidth());
-        w.register(s);
-        add(s);
+
+        _grid[i][j] = type;
+        _buffer[i][j] = type;
       }
-  }
-
-  private HRectangle createSquareShape(int x, int y, int cols, int rows)
-  {
-    check(
-      (cols > 0) &&
-      (rows > 0) &&
-      (x >= 0 && x<cols) &&
-      (y >= 0 && y<rows)
-    );
-
-    int size = min(WINDOW_WIDTH/cols,WINDOW_HEIGHT/rows);
-    int offset_x = (WINDOW_WIDTH-size*cols)/2;
-    int offset_y = (WINDOW_HEIGHT-size*rows)/2;
-    int pos_x = size*x;
-    int pos_y = size*y;
-
-    check(
-      (abs(offset_x*2 + size*cols - WINDOW_WIDTH) < 1) &&
-      (abs(offset_y*2 + size*rows - WINDOW_HEIGHT) < 1)
-    );
-
-    return new HRectangle(offset_x+pos_x, offset_y+pos_y, size, size);
   }
 
   public void update()
   {
+    //set grid to buffer
+    for(int i = 0; i < _cols; i++)
+      for(int j = 0; j < _rows; j++)
+        _grid[i][j] = _buffer[i][j];
+  }
+
+  public void clear(int x, int y)
+  {
+    _buffer[x][y] = 0;
+  }
+
+  public boolean set(int x, int y, int type)
+  {
+    if(_buffer[x][y] != 0)
+      return false;
+    _buffer[x][y] = type;
+    return true;
+  }
+
+  public int get(int x, int y)
+  {
+    return _buffer[x][y];
+  }
+
+  public int[][] getGrid()
+  {
+    int[][] out = new int[_grid.length][_grid[0].length];
+    for(int i = 0; i < _grid.length; i++)
+      for(int j = 0; j < _grid[0].length; j++)
+        out[i][j] = _grid[i][j];
+    return out;
+  }
+
+  public int[][] getBuffer()
+  {
+    int[][] out = new int[_grid.length][_grid[0].length];
+    for(int i = 0; i < _grid.length; i++)
+      for(int j = 0; j < _grid[0].length; j++)
+        out[i][j] = _buffer[i][j];
+    return out;
   }
 }
 /**
@@ -155,10 +175,25 @@ class MapWorld extends World
   {
     int cols = 20;
     int rows = 20;
-    Board board = new Board(this,cols,rows);
-    register(board);
-    ShadowSquareGroup shadowSquareGroup = new ShadowSquareGroup(this,cols,rows);
+
+    Board board = new Board(cols,rows);
+
+    WallGroup wallGroup = new WallGroup(this,board);
+    register(wallGroup);
+    SquareGroup squareGroup = new SquareGroup(this,board);
+    register(squareGroup);
+    ShadowSquareGroup shadowSquareGroup = new ShadowSquareGroup(this,board);
     register(shadowSquareGroup);
+  }
+
+  public void preUpdate()
+  {
+    beings_counter = 0;
+  }
+
+  public void postUpdate()
+  {
+    println("POSTUPDATE: "+beings_counter+" Beings exist.");
   }
 }
 /**
@@ -186,6 +221,49 @@ class Square extends Being
 		noStroke();
     fill(generateColor(_c));
 		_shape.draw();
+  }
+}
+/**
+ * SquareGroup
+ */
+class SquareGroup extends Group<Square>
+{
+
+  SquareGroup(World w, Board board)
+  {
+    super(w);
+
+    int[][] grid = board.getGrid();
+    int cols = grid.length;
+    int rows = grid[0].length;
+
+    for(int i = 0; i < cols; i++)
+      for(int j = 0 ; j < rows; j++)
+      {
+        boolean c[] = new boolean[]{true,true,true};
+        switch(grid[i][j])
+        {
+          case 2: //Ant
+            c[floor(random(3))] = false;
+            int r = floor(random(2));
+            if(c[r] == false)
+              r++;
+            c[r] = false;
+            break;
+          default://Air
+            continue;
+        }
+          
+        HRectangle shape = createSquareShape(i, j, cols, rows);
+        Square s = new Square(shape,c,shape.getWidth());
+        w.register(s);
+        add(s);
+      }
+  }
+
+  public void update()
+  {
+    beings_counter += size();
   }
 }
 /**
@@ -229,10 +307,89 @@ class TemplateInteractor extends Interactor<Square, Square>
     //Add your handle method here
   }
 }
+/**
+ * Wall
+ */
+class Wall extends Being
+{ 
+  boolean[] _c = {false,false,false};
+  float _size;
+  
+  Wall(HShape shape, float size)
+  {
+    super(shape);
+    _size = size;
+  }
+
+  public void update() {
+    // Add update method here
+  }
+
+  public void draw()
+  {
+		noStroke();
+    fill(generateColor(_c));
+		_shape.draw();
+  }
+}
+/**
+ * WallGroup
+ */
+class WallGroup extends Group<Wall>
+{
+
+  WallGroup(World w, Board board)
+  {
+    super(w);
+
+    int[][] grid = board.getGrid();
+    int cols = grid.length;
+    int rows = grid[0].length;
+
+    for(int i = 0; i < cols; i++)
+      for(int j = 0 ; j < rows; j++)
+      {
+        if(grid[i][j] != 1)
+          continue;
+          
+        HRectangle shape = createSquareShape(i, j, cols, rows);
+        Wall s = new Wall(shape,shape.getWidth());
+        w.register(s);
+        add(s);
+      }
+  }
+
+  public void update()
+  {
+    beings_counter += size();
+  }
+}
 public void check(boolean argument)
 {
   if(argument == false)
     throw new RuntimeException("CheckingError");
+}
+public HRectangle createSquareShape(int x, int y, int cols, int rows)
+{
+  check(
+    (cols > 0) &&
+    (rows > 0) &&
+    (x >= 0 && x<cols) &&
+    (y >= 0 && y<rows)
+  );
+
+  int size = min(WINDOW_WIDTH/cols,WINDOW_HEIGHT/rows);
+  int offset_x = (WINDOW_WIDTH-size*cols)/2;
+  int offset_y = (WINDOW_HEIGHT-size*rows)/2;
+  int pos_x = size*x;
+  int pos_y = size*y;
+
+  check(
+    (abs(offset_x*2 + size*cols - WINDOW_WIDTH) < 1) &&
+    (abs(offset_y*2 + size*rows - WINDOW_HEIGHT) < 1)
+  );
+
+  return new HRectangle(offset_x+pos_x, offset_y+pos_y, size, size);
 }
 public int generateColor(boolean c[])
 {
@@ -279,8 +436,8 @@ class ShadowSquare extends Being
     _size = size;
   }
 
-  public void update() {
-    // Add update method here
+  public void update()
+  {
   }
 
   public void draw()
@@ -296,22 +453,53 @@ class ShadowSquare extends Being
 class ShadowSquareGroup extends Group<ShadowSquare>
 {
 
-  ShadowSquareGroup(World w, int cols, int rows) {
+  ShadowSquareGroup(World w, Board board) {
     super(w);
+
+    int[][] grid = board.getGrid();
+    int cols = grid.length;
+    int rows = grid[0].length;
 
     for(int i = 0; i < cols; i++)
       for(int j = 0 ; j < rows; j++)
       {
-        boolean c[] = new boolean[3];
-        for(int k = 0; k < 3; k++)
+        if(grid[i][j] != 2) //Ant
+          continue;
+
+        int[][] dir = {{0,-1},{1,0},{0,1},{-1,0}};
+        
+        /* finding empty spot */
+        int x = i;
+        int y = j;
+        for(int k = 0; k < 4; k++)
         {
-          c[k] = PApplet.parseBoolean(floor(random(2)));
+          int r = floor(random(4));
+          int temp_x = (i + dir[r][0] + cols)%cols;
+          int temp_y = (j + dir[r][1] + rows)%rows;
+
+          int temp = grid[temp_x][temp_y];
+          if(temp != 1) //Wall
+          {
+            x = temp_x;
+            y = temp_y;
+            break;
+          }
         }
+
+        if(x == i && y == j)
+          continue;
+        
+        boolean c[] = new boolean[]{true,true,true};
+        c[floor(random(3))] = false;
+        int r = floor(random(2));
+        if(c[r] == false)
+          r++;
+        c[r] = false;
           
-        HRectangle shape = createSquareShape(i, j, cols, rows);
-        ShadowSquare sh = new ShadowSquare(shape,c,shape.getWidth());
-        w.register(sh);
-        add(sh);
+        HRectangle shape = createSquareShape(x, y, cols, rows);
+        ShadowSquare s = new ShadowSquare(shape,c,shape.getWidth());
+        w.register(s);
+        add(s);
       }
   }
 
@@ -340,6 +528,7 @@ class ShadowSquareGroup extends Group<ShadowSquare>
 
   public void update()
   {
+    beings_counter += size();
   }
 }
   public void settings() {  size(600, 600); }

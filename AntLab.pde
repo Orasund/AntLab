@@ -20,7 +20,9 @@ import hermes.postoffice.*;
 static int WINDOW_WIDTH;// = 600;
 static int WINDOW_HEIGHT; //= 600;
 static final int PORT_IN = 8080;
-static final int PORT_OUT = 8000; 
+static final int PORT_OUT = 8000;
+
+int beings_counter = 0;
 
 World currentWorld;
 

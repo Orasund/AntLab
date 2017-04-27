@@ -1,68 +1,86 @@
-/**
- * Board
- * the playing board
- */
-class Board extends Group<Square>
+class Board
 {
+  int[][] _grid;
+  int[][] _buffer;
+  int _cols;
+  int _rows;
 
-  Board(World w, int cols, int rows)
+  Board(int cols, int rows)
   {
-    super(w);
+    _grid = new int[cols][rows];
+    _buffer = new int[cols][rows];
+    _cols = cols;
+    _rows = rows;
 
-    for(int i = 0; i < cols; i++)
-      for(int j = 0 ; j < rows; j++)
+    generateGrid();
+  }
+
+  private void generateGrid()
+  {
+    for(int i = 0; i < _cols; i++)
+      for(int j = 0; j < _rows; j++)
       {
-        boolean c[] = new boolean[]{true,true,true};
+        int type = 0;
+
         switch(floor(random(6)))
         {
           case 0: //Ant
-            c[floor(random(3))] = false;
-            int r = floor(random(2));
-            if(c[r] == false)
-              r++;
-            c[r] = false;
+            type = 2;
             break;
           case 1: //Wall
           case 2:
-            c[0] = false;
-            c[1] = false;
-            c[2] = false;
+            type = 1;
             break;
           default://Air
             break;
         }
-          
-        HRectangle shape = createSquareShape(i, j, cols, rows);
-        Square s = new Square(shape,c,shape.getWidth());
-        w.register(s);
-        add(s);
+
+        _grid[i][j] = type;
+        _buffer[i][j] = type;
       }
   }
 
-  private HRectangle createSquareShape(int x, int y, int cols, int rows)
+  void update()
   {
-    check(
-      (cols > 0) &&
-      (rows > 0) &&
-      (x >= 0 && x<cols) &&
-      (y >= 0 && y<rows)
-    );
-
-    int size = min(WINDOW_WIDTH/cols,WINDOW_HEIGHT/rows);
-    int offset_x = (WINDOW_WIDTH-size*cols)/2;
-    int offset_y = (WINDOW_HEIGHT-size*rows)/2;
-    int pos_x = size*x;
-    int pos_y = size*y;
-
-    check(
-      (abs(offset_x*2 + size*cols - WINDOW_WIDTH) < 1) &&
-      (abs(offset_y*2 + size*rows - WINDOW_HEIGHT) < 1)
-    );
-
-    return new HRectangle(offset_x+pos_x, offset_y+pos_y, size, size);
+    //set grid to buffer
+    for(int i = 0; i < _cols; i++)
+      for(int j = 0; j < _rows; j++)
+        _grid[i][j] = _buffer[i][j];
   }
 
-  public void update()
+  void clear(int x, int y)
   {
+    _buffer[x][y] = 0;
+  }
+
+  boolean set(int x, int y, int type)
+  {
+    if(_buffer[x][y] != 0)
+      return false;
+    _buffer[x][y] = type;
+    return true;
+  }
+
+  int get(int x, int y)
+  {
+    return _buffer[x][y];
+  }
+
+  int[][] getGrid()
+  {
+    int[][] out = new int[_grid.length][_grid[0].length];
+    for(int i = 0; i < _grid.length; i++)
+      for(int j = 0; j < _grid[0].length; j++)
+        out[i][j] = _grid[i][j];
+    return out;
+  }
+
+  int[][] getBuffer()
+  {
+    int[][] out = new int[_grid.length][_grid[0].length];
+    for(int i = 0; i < _grid.length; i++)
+      for(int j = 0; j < _grid[0].length; j++)
+        out[i][j] = _buffer[i][j];
+    return out;
   }
 }

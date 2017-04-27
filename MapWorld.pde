@@ -13,9 +13,24 @@ class MapWorld extends World
   {
     int cols = 20;
     int rows = 20;
-    Board board = new Board(this,cols,rows);
-    register(board);
-    ShadowSquareGroup shadowSquareGroup = new ShadowSquareGroup(this,cols,rows);
+
+    Board board = new Board(cols,rows);
+
+    WallGroup wallGroup = new WallGroup(this,board);
+    register(wallGroup);
+    SquareGroup squareGroup = new SquareGroup(this,board);
+    register(squareGroup);
+    ShadowSquareGroup shadowSquareGroup = new ShadowSquareGroup(this,board);
     register(shadowSquareGroup);
+  }
+
+  void preUpdate()
+  {
+    beings_counter = 0;
+  }
+
+  void postUpdate()
+  {
+    println("POSTUPDATE: "+beings_counter+" Beings exist.");
   }
 }
