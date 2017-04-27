@@ -1,11 +1,10 @@
 /**
- * Board
- * the playing board
+ * ShadowSquareGroup
  */
-class Board extends Group<Square>
+class ShadowSquareGroup extends Group<ShadowSquare>
 {
 
-  Board(World w, int cols, int rows) {
+  ShadowSquareGroup(World w, int cols, int rows) {
     super(w);
 
     for(int i = 0; i < cols; i++)
@@ -18,9 +17,9 @@ class Board extends Group<Square>
         }
           
         HRectangle shape = createSquareShape(i, j, cols, rows);
-        Square s = new Square(shape,c,shape.getWidth());
-        w.register(s);
-        add(s);
+        ShadowSquare sh = new ShadowSquare(shape,c,shape.getWidth());
+        w.register(sh);
+        add(sh);
       }
   }
 

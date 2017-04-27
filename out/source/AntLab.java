@@ -87,16 +87,14 @@ class Board extends Group<Square>
     for(int i = 0; i < cols; i++)
       for(int j = 0 ; j < rows; j++)
       {
-        boolean c1[] = new boolean[3];
-        boolean c2[] = new boolean[3];
+        boolean c[] = new boolean[3];
         for(int k = 0; k < 3; k++)
         {
-          c1[k] = PApplet.parseBoolean(floor(random(2)));
-          c2[k] = PApplet.parseBoolean(floor(random(2)));
+          c[k] = PApplet.parseBoolean(floor(random(2)));
         }
           
         HRectangle shape = createSquareShape(i, j, cols, rows);
-        Square s = new Square(shape,c1,c2,shape.getWidth());
+        Square s = new Square(shape,c,shape.getWidth());
         w.register(s);
         add(s);
       }
@@ -136,16 +134,12 @@ class Board extends Group<Square>
 class Square extends Being
 { 
   boolean[] _background_color;
-  boolean[] _dot_color;
-  boolean _is_dot_visible;
   float _size;
   
-  Square(HShape shape, boolean[] b_c, boolean[] d_c, float size)
+  Square(HShape shape, boolean[] b_c, float size)
   {
     super(shape);
     _background_color = new boolean[]{b_c[0],b_c[1],b_c[2]};
-    _dot_color = new boolean[]{d_c[0],d_c[1],d_c[2]};
-    _is_dot_visible = true;
     _size = size;
   }
 
@@ -153,30 +147,11 @@ class Square extends Being
     // Add update method here
   }
 
-  private int generateColor(boolean c[])
-  {
-    int[][][] colors = 
-    {
-      {//RED = FALSE
-        {color(0,0,0),color(0,0,255)},//GREEN = FALSE
-        {color(0,255,0),color(0,255,255)}
-      },
-      {
-        {color(255,0,0),color(255,0,255)},//GREEN = FALSE
-        {color(255,255,0),color(255,255,255)}
-      }
-    };
-
-    return colors[PApplet.parseInt(c[0])][PApplet.parseInt(c[1])][PApplet.parseInt(c[2])];
-  }
-
   public void draw()
   {
 		noStroke();
     fill(generateColor(_background_color));
 		_shape.draw();
-    fill(generateColor(_dot_color));
-    rect(_size/4,_size/4,_size/2,_size/2);
   }
 }
 /**
@@ -229,16 +204,126 @@ class TemplateWorld extends World
 
   public void setup()
   {
-    int cols = 14;
-    int rows = 10;
-    Board g = new Board(this,cols,rows);
-    register(g);
+    int cols = 20;
+    int rows = 20;
+    Board board = new Board(this,cols,rows);
+    register(board);
+    ShadowSquareGroup shadowSquareGroup = new ShadowSquareGroup(this,cols,rows);
+    register(shadowSquareGroup);
   }
 }
 public void check(boolean argument)
 {
   if(argument == false)
     throw new RuntimeException("CheckingError");
+}
+public int generateColor(boolean c[])
+{
+  int[][][] colors = 
+  {
+    {//RED = FALSE
+      {//GREEN = FALSE
+        color(0,0,0), //BLACK
+        color(64, 48, 117) //BLUE
+      },
+      {
+        color(45, 136, 45), //GREEN
+        color(41, 79, 109) //GREEN-BLUE
+      }
+    },
+    {
+      {
+        color(170, 57, 57), //RED
+        color(111, 37, 111) //RED-BLUE
+      },//GREEN = FALSE
+      {
+        color(170, 151, 57), //RED-GREEN
+        color(255,255,255) //WHITE
+      }
+    }
+  };
+
+  return colors[PApplet.parseInt(c[0])][PApplet.parseInt(c[1])][PApplet.parseInt(c[2])];
+}
+/**
+ * shadowSquare
+ */
+class ShadowSquare extends Being
+{ 
+  boolean[] _dot_color;
+  boolean _is_dot_visible;
+  float _size;
+  
+  ShadowSquare(HShape shape, boolean[] d_c, float size)
+  {
+    super(shape);
+    _dot_color = new boolean[]{d_c[0],d_c[1],d_c[2]};
+    _is_dot_visible = true;
+    _size = size;
+  }
+
+  public void update() {
+    // Add update method here
+  }
+
+  public void draw()
+  {
+		noStroke();
+    fill(generateColor(_dot_color));
+    rect(_size/4,_size/4,_size/2,_size/2);
+  }
+}
+/**
+ * ShadowSquareGroup
+ */
+class ShadowSquareGroup extends Group<ShadowSquare>
+{
+
+  ShadowSquareGroup(World w, int cols, int rows) {
+    super(w);
+
+    for(int i = 0; i < cols; i++)
+      for(int j = 0 ; j < rows; j++)
+      {
+        boolean c[] = new boolean[3];
+        for(int k = 0; k < 3; k++)
+        {
+          c[k] = PApplet.parseBoolean(floor(random(2)));
+        }
+          
+        HRectangle shape = createSquareShape(i, j, cols, rows);
+        ShadowSquare sh = new ShadowSquare(shape,c,shape.getWidth());
+        w.register(sh);
+        add(sh);
+      }
+  }
+
+  private HRectangle createSquareShape(int x, int y, int cols, int rows)
+  {
+    check(
+      (cols > 0) &&
+      (rows > 0) &&
+      (x >= 0 && x<cols) &&
+      (y >= 0 && y<rows)
+    );
+
+    int size = min(WINDOW_WIDTH/cols,WINDOW_HEIGHT/rows);
+    int offset_x = (WINDOW_WIDTH-size*cols)/2;
+    int offset_y = (WINDOW_HEIGHT-size*rows)/2;
+    int pos_x = size*x;
+    int pos_y = size*y;
+
+    check(
+      (abs(offset_x*2 + size*cols - WINDOW_WIDTH) < 1) &&
+      (abs(offset_y*2 + size*rows - WINDOW_HEIGHT) < 1)
+    );
+
+    return new HRectangle(offset_x+pos_x, offset_y+pos_y, size, size);
+  }
+
+  public void update()
+  {
+  }
 }
   public void settings() {  size(600, 600); }
   static public void main(String[] passedArgs) {

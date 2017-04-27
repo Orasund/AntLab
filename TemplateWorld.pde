@@ -11,9 +11,11 @@ class TemplateWorld extends World
 
   void setup()
   {
-    int cols = 14;
-    int rows = 10;
-    Board g = new Board(this,cols,rows);
-    register(g);
+    int cols = 20;
+    int rows = 20;
+    Board board = new Board(this,cols,rows);
+    register(board);
+    ShadowSquareGroup shadowSquareGroup = new ShadowSquareGroup(this,cols,rows);
+    register(shadowSquareGroup);
   }
 }
