@@ -23,7 +23,9 @@ class Shadow extends Being
   {
     int max = gameLoop.getMax();
     int frame = gameLoop.getFrame()+1;
-    int temp_size = floor(_size/2*sin((PI*max)/(2*frame)));
+    float max_size = _size/2;
+    float multiplier = sin(((PI/2)*frame)/max);
+    int temp_size = floor(max_size*multiplier);
     int offset = floor(_size - temp_size)/2;
 		noStroke();
     fill(generateColor(_dot_color));

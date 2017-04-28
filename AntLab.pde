@@ -37,7 +37,7 @@ void setup() {
   WINDOW_HEIGHT = height;
   Hermes.setPApplet(this);
 
-  gameLoop = new GameLoop(floor(frameRate*8));
+  gameLoop = new GameLoop(floor(60*8));
 
   currentWorld = new MapWorld(PORT_IN, PORT_OUT);       
 

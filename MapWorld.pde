@@ -28,6 +28,10 @@ class MapWorld extends World
   {
     beings_counter = 0;
 
+    noStroke();
+    fill(255);
+    rect(0,0,WINDOW_WIDTH,WINDOW_HEIGHT);
+
     gameLoop.update();
   }
 

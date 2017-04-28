@@ -1,26 +1,26 @@
 class GameLoop
 {
-  int _max_frames;
-  int _frame;
+  private int _max;
+  private int _frame;
 
   GameLoop(int max)
   {
     _frame = 0;
-    _max_frames = max;
+    _max = max;
   }
 
-  void update()
+  public void update()
   {
-    _frame = (_frame+1)%_max_frames;
+    _frame = (_frame+1)%_max;
   }
 
-  int getFrame()
+  public int getFrame()
   {
     return _frame;
   }
 
-  int getMax()
+  public int getMax()
   {
-    return _max_frames;
+    return _max;
   }
 }
