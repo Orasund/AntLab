@@ -43,6 +43,9 @@ static int WINDOW_WIDTH;// = 600;
 static int WINDOW_HEIGHT; //= 600;
 static final int PORT_IN = 8080;
 static final int PORT_OUT = 8000;
+static final int ANT_NUM = 2;
+static final int WALL_NUM = 1;
+static final int AIR_NUM = 0;
 
 int beings_counter = 0;
 
@@ -59,7 +62,7 @@ public void setup() {
   WINDOW_HEIGHT = height;
   Hermes.setPApplet(this);
 
-  gameLoop = new GameLoop(floor(frameRate*8));
+  gameLoop = new GameLoop(floor(60));
 
   currentWorld = new MapWorld(PORT_IN, PORT_OUT);       
 
@@ -75,6 +78,28 @@ public void draw() {
   {
     println(e.getMessage());
     e.printStackTrace();
+  }
+}
+/**
+ * Background
+ */
+class Background extends Being
+{ 
+  Background()
+  {
+    super(new HRectangle(0,0,WINDOW_WIDTH,WINDOW_HEIGHT));
+  }
+
+  public void update()
+  {
+    beings_counter += 1;
+  }
+
+  public void draw()
+  {
+		noStroke();
+    fill(255);
+		_shape.draw();
   }
 }
 class Board
@@ -96,26 +121,36 @@ class Board
 
   private void generateGrid()
   {
+    /************************
+     * GRID
+     ************************/
     for(int i = 0; i < _cols; i++)
       for(int j = 0; j < _rows; j++)
       {
-        int type = 0;
-
-        switch(floor(random(6)))
-        {
-          case 0: //Ant
-            type = 2;
-            break;
-          case 1: //Wall
-          case 2:
-            type = 1;
-            break;
-          default://Air
-            break;
-        }
+        //                Wall, Ant
+        float[] chances = {0.33f,0.12f};
+        int type = randomFromPool(chances);
 
         _grid[i][j] = type;
         _buffer[i][j] = type;
+      }
+    
+    /************************
+     * BUFFER
+     ************************/
+    for(int i = 0; i < _cols; i++)
+      for(int j = 0 ; j < _rows; j++)
+      {
+        if(_grid[i][j] != ANT_NUM)
+          continue;
+        
+        int[] coords = findEmptySpace(i,j,_grid);
+
+        if(coords[0] == i && coords[1] == j)
+          continue;
+        
+        _buffer[i][j] = AIR_NUM;
+        _buffer[coords[0]][coords[1]] = ANT_NUM;
       }
   }
 
@@ -165,18 +200,18 @@ class Board
 }
 class GameLoop
 {
-  int _max_frames;
-  int _frame;
+  private int _max;
+  private int _frame;
 
   GameLoop(int max)
   {
     _frame = 0;
-    _max_frames = max;
+    _max = max;
   }
 
   public void update()
   {
-    _frame = (_frame+1)%_max_frames;
+    _frame = (_frame+1)%_max;
   }
 
   public int getFrame()
@@ -186,7 +221,7 @@ class GameLoop
 
   public int getMax()
   {
-    return _max_frames;
+    return _max;
   }
 }
 /**
@@ -207,6 +242,8 @@ class MapWorld extends World
 
     Board board = new Board(cols,rows);
 
+    Background background = new Background();
+    register(background);
     WallGroup wallGroup = new WallGroup(this,board);
     register(wallGroup);
     SquareGroup squareGroup = new SquareGroup(this,board);
@@ -217,8 +254,7 @@ class MapWorld extends World
 
   public void preUpdate()
   {
-    beings_counter = 0;
-
+    beings_counter = 0; //for Debuging
     gameLoop.update();
   }
 
@@ -252,7 +288,9 @@ class Shadow extends Being
   {
     int max = gameLoop.getMax();
     int frame = gameLoop.getFrame()+1;
-    int temp_size = floor(_size/2*sin((PI*max)/(2*frame)));
+    float max_size = _size/2;
+    float multiplier = sin(((PI/2)*frame)/max);
+    int temp_size = floor(max_size*multiplier);
     int offset = floor(_size - temp_size)/2;
 		noStroke();
     fill(generateColor(_dot_color));
@@ -267,24 +305,24 @@ class ShadowGroup extends Group<Shadow>
   int periode = floor(frameRate/2);
   int frame;
 
-  ShadowGroup(World w, Board board) {
+  ShadowGroup(World w, Board board)
+  {
     super(w);
 
     frame = 0;
 
-    int[][] grid = board.getGrid();
+    int[][] grid = board.getBuffer();
     int cols = grid.length;
     int rows = grid[0].length;
 
     for(int i = 0; i < cols; i++)
       for(int j = 0 ; j < rows; j++)
       {
-        if(grid[i][j] != 2) //Ant
+        if(grid[i][j] != ANT_NUM) //Ant
           continue;
 
-        int[][] dir = {{0,-1},{1,0},{0,1},{-1,0}};
-        
-        /* finding empty spot */
+        /*int[][] dir = {{0,-1},{1,0},{0,1},{-1,0}};
+
         int x = i;
         int y = j;
         for(int k = 0; k < 4; k++)
@@ -304,7 +342,8 @@ class ShadowGroup extends Group<Shadow>
 
         if(x == i && y == j)
           continue;
-        
+        */
+
         boolean c[] = new boolean[]{true,true,true};
         c[floor(random(3))] = false;
         int r = floor(random(2));
@@ -312,7 +351,7 @@ class ShadowGroup extends Group<Shadow>
           r++;
         c[r] = false;
           
-        HRectangle shape = createSquareShape(x, y, cols, rows);
+        HRectangle shape = createSquareShape(i, j, cols, rows);
         Shadow s = new Shadow(shape,c,shape.getWidth());
         w.register(s);
         add(s);
@@ -344,6 +383,7 @@ class ShadowGroup extends Group<Shadow>
 
   public void update()
   {
+    beings_counter += size();
   }
 }
 /**
@@ -416,6 +456,96 @@ class SquareGroup extends Group<Square>
     beings_counter += size();
   }
 }
+public int[] findEmptySpace(int x, int y, int[][] grid)
+{
+  int[][] dir = {{0,-1},{1,0},{0,1},{-1,0}};
+
+  int cols = grid.length;
+  int rows = grid[0].length;
+
+  int[] out = {x,y};
+  for(int k = 0; k < 4; k++)
+  {
+    int r = floor(random(4));
+    int temp_x = (x + dir[r][0] + cols)%cols;
+    int temp_y = (y + dir[r][1] + rows)%rows;
+
+    int temp = grid[temp_x][temp_y];
+    if(temp != WALL_NUM)
+    {
+      out[0] = temp_x;
+      out[1] = temp_y;
+      break;
+    }
+  }
+
+  return out;
+}
+public int generateColor(boolean c[])
+{
+  int[][][] colors = 
+  {
+    {//RED = FALSE
+      {//GREEN = FALSE
+        color(0,0,0), //BLACK
+        color(64, 48, 117) //BLUE
+      },
+      {
+        color(45, 136, 45), //GREEN
+        color(41, 79, 109) //GREEN-BLUE
+      }
+    },
+    {
+      {
+        color(170, 57, 57), //RED
+        color(111, 37, 111) //RED-BLUE
+      },//GREEN = FALSE
+      {
+        color(170, 151, 57), //RED-GREEN
+        color(255,255,255) //WHITE
+      }
+    }
+  };
+
+  return colors[PApplet.parseInt(c[0])][PApplet.parseInt(c[1])][PApplet.parseInt(c[2])];
+}
+public int randomFromPool(float[] chances)
+{
+  //---------------------------
+  //- INPUT CONDITION
+  //---------------------------
+  float sum = 0;
+  for(int i = 0; i < chances.length; i++)
+  {
+    check(chances[i]>=0 && chances[i]<1);
+    sum += chances[i];
+  }
+  check(sum<1);
+
+  //---------------------------
+  //- FUNCTION
+  //---------------------------
+  float r = random(1);
+  int out = 0;
+  float chance = 0;
+  for(int i = 0; i < chances.length; i++)
+  {
+    chance += chances[i];
+
+    if(r<chance)
+    {
+      out = i+1;
+      break;
+    }
+  }
+
+  //---------------------------
+  //- OUTPUT CONDITION
+  //---------------------------
+  check(out>=0 && out <= chances.length);
+
+  return out;
+}
 /**
  * Template being
  */
@@ -471,8 +601,9 @@ class Wall extends Being
     _size = size;
   }
 
-  public void update() {
-    // Add update method here
+  public void update()
+  {
+    
   }
 
   public void draw()
@@ -540,34 +671,6 @@ public HRectangle createSquareShape(int x, int y, int cols, int rows)
   );
 
   return new HRectangle(offset_x+pos_x, offset_y+pos_y, size, size);
-}
-public int generateColor(boolean c[])
-{
-  int[][][] colors = 
-  {
-    {//RED = FALSE
-      {//GREEN = FALSE
-        color(0,0,0), //BLACK
-        color(64, 48, 117) //BLUE
-      },
-      {
-        color(45, 136, 45), //GREEN
-        color(41, 79, 109) //GREEN-BLUE
-      }
-    },
-    {
-      {
-        color(170, 57, 57), //RED
-        color(111, 37, 111) //RED-BLUE
-      },//GREEN = FALSE
-      {
-        color(170, 151, 57), //RED-GREEN
-        color(255,255,255) //WHITE
-      }
-    }
-  };
-
-  return colors[PApplet.parseInt(c[0])][PApplet.parseInt(c[1])][PApplet.parseInt(c[2])];
 }
   public void settings() {  size(600, 600); }
   static public void main(String[] passedArgs) {

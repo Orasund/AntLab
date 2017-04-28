@@ -16,6 +16,8 @@ class MapWorld extends World
 
     Board board = new Board(cols,rows);
 
+    Background background = new Background();
+    register(background);
     WallGroup wallGroup = new WallGroup(this,board);
     register(wallGroup);
     SquareGroup squareGroup = new SquareGroup(this,board);
@@ -26,12 +28,7 @@ class MapWorld extends World
 
   void preUpdate()
   {
-    beings_counter = 0;
-
-    noStroke();
-    fill(255);
-    rect(0,0,WINDOW_WIDTH,WINDOW_HEIGHT);
-
+    beings_counter = 0; //for Debuging
     gameLoop.update();
   }
 

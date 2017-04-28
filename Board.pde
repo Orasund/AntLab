@@ -17,26 +17,36 @@ class Board
 
   private void generateGrid()
   {
+    /************************
+     * GRID
+     ************************/
     for(int i = 0; i < _cols; i++)
       for(int j = 0; j < _rows; j++)
       {
-        int type = 0;
-
-        switch(floor(random(6)))
-        {
-          case 0: //Ant
-            type = 2;
-            break;
-          case 1: //Wall
-          case 2:
-            type = 1;
-            break;
-          default://Air
-            break;
-        }
+        //                Wall, Ant
+        float[] chances = {0.33,0.12};
+        int type = randomFromPool(chances);
 
         _grid[i][j] = type;
         _buffer[i][j] = type;
+      }
+    
+    /************************
+     * BUFFER
+     ************************/
+    for(int i = 0; i < _cols; i++)
+      for(int j = 0 ; j < _rows; j++)
+      {
+        if(_grid[i][j] != ANT_NUM)
+          continue;
+        
+        int[] coords = findEmptySpace(i,j,_grid);
+
+        if(coords[0] == i && coords[1] == j)
+          continue;
+        
+        _buffer[i][j] = AIR_NUM;
+        _buffer[coords[0]][coords[1]] = ANT_NUM;
       }
   }
 

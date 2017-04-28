@@ -12,8 +12,9 @@ class Wall extends Being
     _size = size;
   }
 
-  public void update() {
-    // Add update method here
+  public void update()
+  {
+    
   }
 
   public void draw()

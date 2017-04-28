@@ -6,24 +6,24 @@ class ShadowGroup extends Group<Shadow>
   int periode = floor(frameRate/2);
   int frame;
 
-  ShadowGroup(World w, Board board) {
+  ShadowGroup(World w, Board board)
+  {
     super(w);
 
     frame = 0;
 
-    int[][] grid = board.getGrid();
+    int[][] grid = board.getBuffer();
     int cols = grid.length;
     int rows = grid[0].length;
 
     for(int i = 0; i < cols; i++)
       for(int j = 0 ; j < rows; j++)
       {
-        if(grid[i][j] != 2) //Ant
+        if(grid[i][j] != ANT_NUM) //Ant
           continue;
 
-        int[][] dir = {{0,-1},{1,0},{0,1},{-1,0}};
-        
-        /* finding empty spot */
+        /*int[][] dir = {{0,-1},{1,0},{0,1},{-1,0}};
+
         int x = i;
         int y = j;
         for(int k = 0; k < 4; k++)
@@ -43,7 +43,8 @@ class ShadowGroup extends Group<Shadow>
 
         if(x == i && y == j)
           continue;
-        
+        */
+
         boolean c[] = new boolean[]{true,true,true};
         c[floor(random(3))] = false;
         int r = floor(random(2));
@@ -51,7 +52,7 @@ class ShadowGroup extends Group<Shadow>
           r++;
         c[r] = false;
           
-        HRectangle shape = createSquareShape(x, y, cols, rows);
+        HRectangle shape = createSquareShape(i, j, cols, rows);
         Shadow s = new Shadow(shape,c,shape.getWidth());
         w.register(s);
         add(s);
@@ -83,5 +84,6 @@ class ShadowGroup extends Group<Shadow>
 
   public void update()
   {
+    beings_counter += size();
   }
 }

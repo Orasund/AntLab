@@ -21,6 +21,9 @@ static int WINDOW_WIDTH;// = 600;
 static int WINDOW_HEIGHT; //= 600;
 static final int PORT_IN = 8080;
 static final int PORT_OUT = 8000;
+static final int ANT_NUM = 2;
+static final int WALL_NUM = 1;
+static final int AIR_NUM = 0;
 
 int beings_counter = 0;
 
@@ -37,7 +40,7 @@ void setup() {
   WINDOW_HEIGHT = height;
   Hermes.setPApplet(this);
 
-  gameLoop = new GameLoop(floor(60*8));
+  gameLoop = new GameLoop(floor(60));
 
   currentWorld = new MapWorld(PORT_IN, PORT_OUT);       
 
