@@ -20,13 +20,15 @@ class MapWorld extends World
     register(wallGroup);
     SquareGroup squareGroup = new SquareGroup(this,board);
     register(squareGroup);
-    ShadowSquareGroup shadowSquareGroup = new ShadowSquareGroup(this,board);
-    register(shadowSquareGroup);
+    ShadowGroup shadowGroup = new ShadowGroup(this,board);
+    register(shadowGroup);
   }
 
   void preUpdate()
   {
     beings_counter = 0;
+
+    gameLoop.update();
   }
 
   void postUpdate()

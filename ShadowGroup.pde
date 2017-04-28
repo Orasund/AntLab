@@ -1,11 +1,15 @@
 /**
- * ShadowSquareGroup
+ * ShadowGroup
  */
-class ShadowSquareGroup extends Group<ShadowSquare>
+class ShadowGroup extends Group<Shadow>
 {
+  int periode = floor(frameRate/2);
+  int frame;
 
-  ShadowSquareGroup(World w, Board board) {
+  ShadowGroup(World w, Board board) {
     super(w);
+
+    frame = 0;
 
     int[][] grid = board.getGrid();
     int cols = grid.length;
@@ -48,7 +52,7 @@ class ShadowSquareGroup extends Group<ShadowSquare>
         c[r] = false;
           
         HRectangle shape = createSquareShape(x, y, cols, rows);
-        ShadowSquare s = new ShadowSquare(shape,c,shape.getWidth());
+        Shadow s = new Shadow(shape,c,shape.getWidth());
         w.register(s);
         add(s);
       }
@@ -79,6 +83,5 @@ class ShadowSquareGroup extends Group<ShadowSquare>
 
   public void update()
   {
-    beings_counter += size();
   }
 }

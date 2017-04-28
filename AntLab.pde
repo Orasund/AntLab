@@ -25,6 +25,7 @@ static final int PORT_OUT = 8000;
 int beings_counter = 0;
 
 World currentWorld;
+GameLoop gameLoop;
 
 ///////////////////////////////////////////////////
 // PAPPLET
@@ -35,6 +36,8 @@ void setup() {
   WINDOW_WIDTH = width;
   WINDOW_HEIGHT = height;
   Hermes.setPApplet(this);
+
+  gameLoop = new GameLoop(floor(frameRate*8));
 
   currentWorld = new MapWorld(PORT_IN, PORT_OUT);       
 
