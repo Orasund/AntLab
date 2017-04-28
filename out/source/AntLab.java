@@ -302,60 +302,16 @@ class Shadow extends Being
  */
 class ShadowGroup extends Group<Shadow>
 {
-  int periode = floor(frameRate/2);
-  int frame;
+  //int periode = floor(frameRate/2);
+  //int frame;
+  Board _board;
 
   ShadowGroup(World w, Board board)
   {
     super(w);
-
-    frame = 0;
-
-    int[][] grid = board.getBuffer();
-    int cols = grid.length;
-    int rows = grid[0].length;
-
-    for(int i = 0; i < cols; i++)
-      for(int j = 0 ; j < rows; j++)
-      {
-        if(grid[i][j] != ANT_NUM) //Ant
-          continue;
-
-        /*int[][] dir = {{0,-1},{1,0},{0,1},{-1,0}};
-
-        int x = i;
-        int y = j;
-        for(int k = 0; k < 4; k++)
-        {
-          int r = floor(random(4));
-          int temp_x = (i + dir[r][0] + cols)%cols;
-          int temp_y = (j + dir[r][1] + rows)%rows;
-
-          int temp = grid[temp_x][temp_y];
-          if(temp != 1) //Wall
-          {
-            x = temp_x;
-            y = temp_y;
-            break;
-          }
-        }
-
-        if(x == i && y == j)
-          continue;
-        */
-
-        boolean c[] = new boolean[]{true,true,true};
-        c[floor(random(3))] = false;
-        int r = floor(random(2));
-        if(c[r] == false)
-          r++;
-        c[r] = false;
-          
-        HRectangle shape = createSquareShape(i, j, cols, rows);
-        Shadow s = new Shadow(shape,c,shape.getWidth());
-        w.register(s);
-        add(s);
-      }
+    _board = board;
+    //frame = 0;
+    readFromBoard();
   }
 
   private HRectangle createSquareShape(int x, int y, int cols, int rows)
@@ -381,8 +337,42 @@ class ShadowGroup extends Group<Shadow>
     return new HRectangle(offset_x+pos_x, offset_y+pos_y, size, size);
   }
 
+  private void readFromBoard()
+  {
+    World w = getWorld();
+    int[][] grid = _board.getBuffer();
+
+    int cols = grid.length;
+    int rows = grid[0].length;
+
+    for(int i = 0; i < cols; i++)
+      for(int j = 0 ; j < rows; j++)
+      {
+        if(grid[i][j] != ANT_NUM) //Ant
+          continue;
+
+        boolean c[] = new boolean[]{true,true,true};
+        c[floor(random(3))] = false;
+        int r = floor(random(2));
+        if(c[r] == false)
+          r++;
+        c[r] = false;
+          
+        HRectangle shape = createSquareShape(i, j, cols, rows);
+        Shadow s = new Shadow(shape,c,shape.getWidth());
+        w.register(s);
+        add(s);
+      }
+  }
+
   public void update()
   {
+    if(gameLoop.getFrame()==0)
+    {
+      clear();
+      readFromBoard();
+    }
+
     beings_counter += size();
   }
 }
