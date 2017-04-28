@@ -41,33 +41,40 @@ class AntGroup extends Group<Ant>
 
   public void update()
   {
-    int cols = _board.getCols();
-    int rows = _board.getRows();
-
-    ArrayList<Ant> ants = getObjects();
-
-    int size = ants.size();
-    for(int i = 0; i < size; i++)
+    if(gameLoop.getFrame()==0)
     {
-      Ant a = ants.get(i);
-        
-      int[] dir = getDir(a.getDirection());
-      int[] coord = a.getCoords();
-      int temp_x = floor(coord[0]+dir[0]+cols)%cols;
-      int temp_y = floor(coord[1]+dir[0]+rows)%rows;
+      int cols = _board.getCols();
+      int rows = _board.getRows();
 
-      if(_board.get(temp_x,temp_y) == 0)
-      {
-        _board.set(temp_x,temp_y,ANT_NUM);
-        a.walk(cols,rows);
+      ArrayList<Ant> ants = getObjects();
 
-        _board.clear(coord[0],coord[1]);
-      }
-      else
+      int size = ants.size();
+      for(int i = 0; i < size; i++)
       {
-        a.turnLeft();
+        Ant a = ants.get(i);
+          
+        int[] dir = getDir(a.getDirection());
+        int[] coord = a.getCoords();
+        int temp_x = floor(coord[0]+dir[0]+cols)%cols;
+        int temp_y = floor(coord[1]+dir[0]+rows)%rows;
+
+        if(_board.get(temp_x,temp_y) == AIR_NUM)
+        {
+          if(_board.set(temp_x,temp_y,ANT_NUM) == true)
+          {
+            a.walk(cols,rows);
+
+            _board.clear(coord[0],coord[1]);
+          }
+        }
+        else
+        {
+          a.turnLeft();
+        }
       }
     }
+    gameLoop.update();
+
     beings_counter += size();
   }
 }

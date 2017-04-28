@@ -42,11 +42,10 @@ class Ant extends Being
   public void walk(int cols, int rows)
   {
     int[] offset = calcOffset(cols,rows);
-    PVector coords = getPosition();
     int[] dir = getDir(_d);
     float temp_x = (_x+dir[0]+cols)%cols;
     float temp_y = (_y+dir[1]+rows)%rows;
-    setPosition(offset[0]+_size*temp_x,offset[0]+_size*temp_y);
+    setPosition(offset[0]+_size*temp_x,offset[1]+_size*temp_y);
   }
 
   public void turnLeft()

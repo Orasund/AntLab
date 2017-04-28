@@ -29,7 +29,6 @@ class MapWorld extends World
   void preUpdate()
   {
     beings_counter = 0; //for Debuging
-    gameLoop.update();
   }
 
   void postUpdate()

@@ -124,11 +124,10 @@ class Ant extends Being
   public void walk(int cols, int rows)
   {
     int[] offset = calcOffset(cols,rows);
-    PVector coords = getPosition();
     int[] dir = getDir(_d);
     float temp_x = (_x+dir[0]+cols)%cols;
     float temp_y = (_y+dir[1]+rows)%rows;
-    setPosition(offset[0]+_size*temp_x,offset[0]+_size*temp_y);
+    setPosition(offset[0]+_size*temp_x,offset[1]+_size*temp_y);
   }
 
   public void turnLeft()
@@ -194,33 +193,40 @@ class AntGroup extends Group<Ant>
 
   public void update()
   {
-    int cols = _board.getCols();
-    int rows = _board.getRows();
-
-    ArrayList<Ant> ants = getObjects();
-
-    int size = ants.size();
-    for(int i = 0; i < size; i++)
+    if(gameLoop.getFrame()==0)
     {
-      Ant a = ants.get(i);
-        
-      int[] dir = getDir(a.getDirection());
-      int[] coord = a.getCoords();
-      int temp_x = floor(coord[0]+dir[0]+cols)%cols;
-      int temp_y = floor(coord[1]+dir[0]+rows)%rows;
+      int cols = _board.getCols();
+      int rows = _board.getRows();
 
-      if(_board.get(temp_x,temp_y) == 0)
-      {
-        _board.set(temp_x,temp_y,ANT_NUM);
-        a.walk(cols,rows);
+      ArrayList<Ant> ants = getObjects();
 
-        _board.clear(coord[0],coord[1]);
-      }
-      else
+      int size = ants.size();
+      for(int i = 0; i < size; i++)
       {
-        a.turnLeft();
+        Ant a = ants.get(i);
+          
+        int[] dir = getDir(a.getDirection());
+        int[] coord = a.getCoords();
+        int temp_x = floor(coord[0]+dir[0]+cols)%cols;
+        int temp_y = floor(coord[1]+dir[0]+rows)%rows;
+
+        if(_board.get(temp_x,temp_y) == AIR_NUM)
+        {
+          if(_board.set(temp_x,temp_y,ANT_NUM) == true)
+          {
+            a.walk(cols,rows);
+
+            _board.clear(coord[0],coord[1]);
+          }
+        }
+        else
+        {
+          a.turnLeft();
+        }
       }
     }
+    gameLoop.update();
+
     beings_counter += size();
   }
 }
@@ -282,7 +288,7 @@ class Board
     /************************
      * BUFFER
      ************************/
-    for(int i = 0; i < _cols; i++)
+    /*for(int i = 0; i < _cols; i++)
       for(int j = 0 ; j < _rows; j++)
       {
         if(_grid[i][j] != ANT_NUM)
@@ -295,7 +301,7 @@ class Board
         
         _buffer[i][j] = AIR_NUM;
         _buffer[coords[0]][coords[1]] = ANT_NUM;
-      }
+      }*/
   }
 
   public void update()
@@ -321,7 +327,7 @@ class Board
 
   public int get(int x, int y)
   {
-    return _buffer[x][y];
+    return _grid[x][y];
   }
 
   public int getCols()
@@ -409,7 +415,6 @@ class MapWorld extends World
   public void preUpdate()
   {
     beings_counter = 0; //for Debuging
-    gameLoop.update();
   }
 
   public void postUpdate()

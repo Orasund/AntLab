@@ -34,7 +34,7 @@ class Board
     /************************
      * BUFFER
      ************************/
-    for(int i = 0; i < _cols; i++)
+    /*for(int i = 0; i < _cols; i++)
       for(int j = 0 ; j < _rows; j++)
       {
         if(_grid[i][j] != ANT_NUM)
@@ -47,7 +47,7 @@ class Board
         
         _buffer[i][j] = AIR_NUM;
         _buffer[coords[0]][coords[1]] = ANT_NUM;
-      }
+      }*/
   }
 
   void update()
@@ -60,12 +60,12 @@ class Board
 
   void clear(int x, int y)
   {
-    _buffer[x][y] = 0;
+    _buffer[x][y] = AIR_NUM;
   }
 
   boolean set(int x, int y, int type)
   {
-    if(_buffer[x][y] != 0)
+    if(_buffer[x][y] != AIR_NUM)
       return false;
     _buffer[x][y] = type;
     return true;
@@ -73,7 +73,7 @@ class Board
 
   int get(int x, int y)
   {
-    return _buffer[x][y];
+    return _grid[x][y];
   }
 
   int getCols()
