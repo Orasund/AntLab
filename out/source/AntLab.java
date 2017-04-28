@@ -81,6 +81,150 @@ public void draw() {
   }
 }
 /**
+ * Ant
+ */
+class Ant extends Being
+{ 
+  private boolean[] _c; //Color
+  private float _size;
+  private int _d;       //Direction
+  private int _x;
+  private int _y;
+  
+  Ant(HShape shape, boolean[] b_c, float size, int x, int y)
+  {
+    super(shape);
+    _c = new boolean[]{b_c[0],b_c[1],b_c[2]};
+    _size = size;
+    _d = floor(random(4));
+    _x = x;
+    _y = y;
+  }
+
+  public void update() {
+  }
+
+  public int[] getCoords()
+  {
+    int[] out = {_x,_y};
+    return out;
+  }
+
+  public int getDirection()
+  {
+    return _d;
+  }
+
+  public boolean[] getColor()
+  {
+    boolean[] out = {_c[0],_c[1],_c[2]};
+    return out;
+  }
+
+  public void walk(int cols, int rows)
+  {
+    int[] offset = calcOffset(cols,rows);
+    PVector coords = getPosition();
+    int[] dir = getDir(_d);
+    float temp_x = (_x+dir[0]+cols)%cols;
+    float temp_y = (_y+dir[1]+rows)%rows;
+    setPosition(offset[0]+_size*temp_x,offset[0]+_size*temp_y);
+  }
+
+  public void turnLeft()
+  {
+    _d = (_d+1)%4;
+  }
+
+  public void draw()
+  {
+		noStroke();
+    fill(generateColor(_c));
+		_shape.draw();
+
+    int[] dir = getDir(_d);
+    int temp_size = floor(_size/4);
+    int offset = floor(_size-temp_size)/2;
+    int temp_x = temp_size*dir[0]*1;
+    int temp_y = temp_size*dir[1]*1;
+    fill(255);
+    rect(offset+temp_x,offset+temp_y,temp_size,temp_size);
+  }
+}
+/**
+ * SquareGroup
+ */
+class AntGroup extends Group<Ant>
+{
+  Board _board;
+
+  AntGroup(World w, Board board)
+  {
+    super(w);
+
+    _board = board;
+
+    int[][] grid = board.getGrid();
+    int cols = grid.length;
+    int rows = grid[0].length;
+
+    for(int i = 0; i < cols; i++)
+      for(int j = 0 ; j < rows; j++)
+      {
+        boolean c[] = new boolean[]{true,true,true};
+        switch(grid[i][j])
+        {
+          case 2: //Ant
+            c[floor(random(3))] = false;
+            int r = floor(random(2));
+            if(c[r] == false)
+              r++;
+            c[r] = false;
+            break;
+          default://Air
+            continue;
+        }
+          
+        HRectangle shape = createSquareShape(i, j, cols, rows);
+        Ant s = new Ant(shape,c,shape.getWidth(),i,j);
+        w.register(s);
+        add(s);
+      }
+  }
+
+  public void update()
+  {
+    int cols = _board.getCols();
+    int rows = _board.getRows();
+
+    ArrayList<Ant> ants = getObjects();
+
+    int size = ants.size();
+    for(int i = 0; i < size; i++)
+    {
+      Ant a = ants.get(i);
+        
+      int[] dir = getDir(a.getDirection());
+      int[] coord = a.getCoords();
+      int temp_x = floor(coord[0]+dir[0]+cols)%cols;
+      int temp_y = floor(coord[1]+dir[0]+rows)%rows;
+
+      if(_board.get(temp_x,temp_y) == 0)
+      {
+        _board.set(temp_x,temp_y,ANT_NUM);
+        a.walk(cols,rows);
+
+        _board.clear(coord[0],coord[1]);
+      }
+      else
+      {
+        a.turnLeft();
+      }
+    }
+    beings_counter += size();
+  }
+}
+/**
  * Background
  */
 class Background extends Being
@@ -180,6 +324,16 @@ class Board
     return _buffer[x][y];
   }
 
+  public int getCols()
+  {
+    return _grid.length;
+  }
+
+  public int getRows()
+  {
+    return _grid[0].length;
+  }
+
   public int[][] getGrid()
   {
     int[][] out = new int[_grid.length][_grid[0].length];
@@ -246,8 +400,8 @@ class MapWorld extends World
     register(background);
     WallGroup wallGroup = new WallGroup(this,board);
     register(wallGroup);
-    SquareGroup squareGroup = new SquareGroup(this,board);
-    register(squareGroup);
+    AntGroup antGroup = new AntGroup(this,board);
+    register(antGroup);
     ShadowGroup shadowGroup = new ShadowGroup(this,board);
     register(shadowGroup);
   }
@@ -376,80 +530,8 @@ class ShadowGroup extends Group<Shadow>
     beings_counter += size();
   }
 }
-/**
- * Square
- * the Square is part of the gameboard
- */
-class Square extends Being
-{ 
-  boolean[] _c;
-  float _size;
-  
-  Square(HShape shape, boolean[] b_c, float size)
-  {
-    super(shape);
-    _c = new boolean[]{b_c[0],b_c[1],b_c[2]};
-    _size = size;
-  }
-
-  public void update() {
-    // Add update method here
-  }
-
-  public void draw()
-  {
-		noStroke();
-    fill(generateColor(_c));
-		_shape.draw();
-  }
-}
-/**
- * SquareGroup
- */
-class SquareGroup extends Group<Square>
-{
-
-  SquareGroup(World w, Board board)
-  {
-    super(w);
-
-    int[][] grid = board.getGrid();
-    int cols = grid.length;
-    int rows = grid[0].length;
-
-    for(int i = 0; i < cols; i++)
-      for(int j = 0 ; j < rows; j++)
-      {
-        boolean c[] = new boolean[]{true,true,true};
-        switch(grid[i][j])
-        {
-          case 2: //Ant
-            c[floor(random(3))] = false;
-            int r = floor(random(2));
-            if(c[r] == false)
-              r++;
-            c[r] = false;
-            break;
-          default://Air
-            continue;
-        }
-          
-        HRectangle shape = createSquareShape(i, j, cols, rows);
-        Square s = new Square(shape,c,shape.getWidth());
-        w.register(s);
-        add(s);
-      }
-  }
-
-  public void update()
-  {
-    beings_counter += size();
-  }
-}
 public int[] findEmptySpace(int x, int y, int[][] grid)
 {
-  int[][] dir = {{0,-1},{1,0},{0,1},{-1,0}};
-
   int cols = grid.length;
   int rows = grid[0].length;
 
@@ -457,8 +539,10 @@ public int[] findEmptySpace(int x, int y, int[][] grid)
   for(int k = 0; k < 4; k++)
   {
     int r = floor(random(4));
-    int temp_x = (x + dir[r][0] + cols)%cols;
-    int temp_y = (y + dir[r][1] + rows)%rows;
+    int[] dir = getDir(r);
+
+    int temp_x = (x + dir[0] + cols)%cols;
+    int temp_y = (y + dir[1] + rows)%rows;
 
     int temp = grid[temp_x][temp_y];
     if(temp != WALL_NUM)
@@ -498,6 +582,14 @@ public int generateColor(boolean c[])
   };
 
   return colors[PApplet.parseInt(c[0])][PApplet.parseInt(c[1])][PApplet.parseInt(c[2])];
+}
+public int[] getDir(int k)
+{
+  check(k >= 0 && k < 4);
+
+  int[][] dir = {{0,-1},{1,0},{0,1},{-1,0}};
+  
+  return dir[k];
 }
 public int randomFromPool(float[] chances)
 {
@@ -558,7 +650,7 @@ class TemplateBeing extends Being {
  * Don't forget to change TemplateBeing-s to
  * the names of the Being-types you want to interact
  */
-class TemplateInteractor extends Interactor<Square, Square>
+class TemplateInteractor extends Interactor<Ant, Ant>
 {
   TemplateInteractor()
   {
@@ -566,13 +658,13 @@ class TemplateInteractor extends Interactor<Square, Square>
     //Add your constructor info here
   }
 
-  public boolean detect(Square being1, Square being2)
+  public boolean detect(Ant being1, Ant being2)
   {
     //Add your detect method here
     return true;
   }
 
-  public void handle(Square being1, Square being2)
+  public void handle(Ant being1, Ant being2)
   {
     //Add your handle method here
   }
@@ -650,17 +742,27 @@ public HRectangle createSquareShape(int x, int y, int cols, int rows)
   );
 
   int size = min(WINDOW_WIDTH/cols,WINDOW_HEIGHT/rows);
-  int offset_x = (WINDOW_WIDTH-size*cols)/2;
-  int offset_y = (WINDOW_HEIGHT-size*rows)/2;
+  int[] offset = calcOffset(cols, rows);
   int pos_x = size*x;
   int pos_y = size*y;
 
   check(
-    (abs(offset_x*2 + size*cols - WINDOW_WIDTH) < 1) &&
-    (abs(offset_y*2 + size*rows - WINDOW_HEIGHT) < 1)
+    (abs(offset[0]*2 + size*cols - WINDOW_WIDTH) < 1) &&
+    (abs(offset[1]*2 + size*rows - WINDOW_HEIGHT) < 1)
   );
 
-  return new HRectangle(offset_x+pos_x, offset_y+pos_y, size, size);
+  return new HRectangle(offset[0]+pos_x, offset[1]+pos_y, size, size);
+}
+
+public int[] calcOffset(int cols, int rows)
+{
+  int size = min(WINDOW_WIDTH/cols,WINDOW_HEIGHT/rows);
+  int[] out = {
+    (WINDOW_WIDTH-size*cols)/2,
+    (WINDOW_HEIGHT-size*rows)/2
+  };
+
+  return out;
 }
   public void settings() {  size(600, 600); }
   static public void main(String[] passedArgs) {

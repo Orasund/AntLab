@@ -8,15 +8,25 @@ HRectangle createSquareShape(int x, int y, int cols, int rows)
   );
 
   int size = min(WINDOW_WIDTH/cols,WINDOW_HEIGHT/rows);
-  int offset_x = (WINDOW_WIDTH-size*cols)/2;
-  int offset_y = (WINDOW_HEIGHT-size*rows)/2;
+  int[] offset = calcOffset(cols, rows);
   int pos_x = size*x;
   int pos_y = size*y;
 
   check(
-    (abs(offset_x*2 + size*cols - WINDOW_WIDTH) < 1) &&
-    (abs(offset_y*2 + size*rows - WINDOW_HEIGHT) < 1)
+    (abs(offset[0]*2 + size*cols - WINDOW_WIDTH) < 1) &&
+    (abs(offset[1]*2 + size*rows - WINDOW_HEIGHT) < 1)
   );
 
-  return new HRectangle(offset_x+pos_x, offset_y+pos_y, size, size);
+  return new HRectangle(offset[0]+pos_x, offset[1]+pos_y, size, size);
+}
+
+int[] calcOffset(int cols, int rows)
+{
+  int size = min(WINDOW_WIDTH/cols,WINDOW_HEIGHT/rows);
+  int[] out = {
+    (WINDOW_WIDTH-size*cols)/2,
+    (WINDOW_HEIGHT-size*rows)/2
+  };
+
+  return out;
 }

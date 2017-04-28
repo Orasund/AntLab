@@ -20,8 +20,8 @@ class MapWorld extends World
     register(background);
     WallGroup wallGroup = new WallGroup(this,board);
     register(wallGroup);
-    SquareGroup squareGroup = new SquareGroup(this,board);
-    register(squareGroup);
+    AntGroup antGroup = new AntGroup(this,board);
+    register(antGroup);
     ShadowGroup shadowGroup = new ShadowGroup(this,board);
     register(shadowGroup);
   }

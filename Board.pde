@@ -76,6 +76,16 @@ class Board
     return _buffer[x][y];
   }
 
+  int getCols()
+  {
+    return _grid.length;
+  }
+
+  int getRows()
+  {
+    return _grid[0].length;
+  }
+
   int[][] getGrid()
   {
     int[][] out = new int[_grid.length][_grid[0].length];
