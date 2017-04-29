@@ -33,6 +33,7 @@ class MapWorld extends World
 
   void postUpdate()
   {
+    gameLoop.update();
     println("POSTUPDATE: "+beings_counter+" Beings exist.");
   }
 }

@@ -21,7 +21,7 @@ class Shadow extends Being
 
   public void draw()
   {
-    int max = gameLoop.getMax();
+   /* int max = gameLoop.getMax();
     int frame = gameLoop.getFrame()+1;
     float max_size = _size/2;
     float multiplier = sin(((PI/2)*frame)/max);
@@ -30,5 +30,6 @@ class Shadow extends Being
 		noStroke();
     fill(generateColor(_dot_color));
     rect(offset,offset,temp_size,temp_size);
+    */
   }
 }

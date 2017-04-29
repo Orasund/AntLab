@@ -87,8 +87,10 @@ class AntGroup extends Group<Ant>
           a.turnLeft();
         }
       }
+      
+       _board.update();
     }
-    gameLoop.update();
+   
 
     beings_counter += size();
   }
