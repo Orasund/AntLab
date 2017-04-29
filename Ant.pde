@@ -28,6 +28,11 @@ class Ant extends Being
     return out;
   }
 
+  public float getSize()
+  {
+    return _size;
+  }
+
   public int getDirection()
   {
     return _d;
@@ -37,15 +42,6 @@ class Ant extends Being
   {
     boolean[] out = {_c[0],_c[1],_c[2]};
     return out;
-  }
-
-  public void walk(int cols, int rows)
-  {
-    int[] offset = calcOffset(cols,rows);
-    int[] dir = getDir(_d);
-    float temp_x = (_x+dir[0]+cols)%cols;
-    float temp_y = (_y+dir[1]+rows)%rows;
-    setPosition(offset[0]+_size*temp_x,offset[1]+_size*temp_y);
   }
 
   public void turnLeft()
