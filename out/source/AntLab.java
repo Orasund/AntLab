@@ -198,8 +198,8 @@ class AntGroup extends Group<Ant>
     float size = ant.getSize();
     int temp_x = (coords[0]+dir[0]+cols)%cols;
     int temp_y = (coords[1]+dir[1]+rows)%rows;
-    
-    if(_board.set(temp_x,temp_y,ANT_NUM) != false)
+
+    if(_board.set(temp_x,temp_y,ANT_NUM) == false)
       return;
 
     ant.setPosition(offset[0]+size*temp_x,offset[1]+size*temp_y);
@@ -224,7 +224,7 @@ class AntGroup extends Group<Ant>
         int[] dir = getDir(a.getDirection());
         int[] coord = a.getCoords();
         int temp_x = floor(coord[0]+dir[0]+cols)%cols;
-        int temp_y = floor(coord[1]+dir[0]+rows)%rows;
+        int temp_y = floor(coord[1]+dir[1]+rows)%rows;
 
         if(_board.get(temp_x,temp_y) == AIR_NUM)
         {
@@ -332,8 +332,9 @@ class Board
 
   public boolean set(int x, int y, int type)
   {
-    if(_buffer[x][y] != AIR_NUM)
+    if(_grid[x][y] != AIR_NUM)
       return false;
+      
     _buffer[x][y] = type;
     return true;
   }
@@ -433,7 +434,7 @@ class MapWorld extends World
   public void postUpdate()
   {
     gameLoop.update();
-    println("POSTUPDATE: "+beings_counter+" Beings exist.");
+    //println("POSTUPDATE: "+beings_counter+" Beings exist.");
   }
 }
 /**

@@ -65,8 +65,9 @@ class Board
 
   boolean set(int x, int y, int type)
   {
-    if(_buffer[x][y] != AIR_NUM)
+    if(_grid[x][y] != AIR_NUM)
       return false;
+      
     _buffer[x][y] = type;
     return true;
   }
