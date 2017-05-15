@@ -41,7 +41,7 @@ class ShadowGroup extends Group<Shadow>
   private void readFromBoard()
   {
     World w = getWorld();
-    int[][] grid = _board.getBuffer();
+    int[][] grid = _board.getGrid();
 
     int cols = grid.length;
     int rows = grid[0].length;
@@ -70,7 +70,7 @@ class ShadowGroup extends Group<Shadow>
   {
     if(gameLoop.getFrame()==0)
     {
-      clear();
+      destroy();
       readFromBoard();
     }
 

@@ -39,13 +39,31 @@ class AntGroup extends Group<Ant>
       }
   }
 
+  public int[] getEyes(Ant ant)
+  {
+    int[] out = new int[3];
+
+    int[][] eyes = {{0,-1},{-1,0},{1,0}};
+
+    int[] temp_coords = getTempCoords(ant);
+    out[0] = _board.get(temp_coords[0],temp_coords[1]);
+    out[1] = out[0];
+    out[2] = out[0];
+    return out;
+  }
+
   public int[] getTempCoords(Ant ant)
   {
     int cols = _board.getCols();
     int rows = _board.getRows();
-    int[] dir = getDir(ant.getDirection());
+    int[] dir = lookingAt(ant.getDirection());
     int[] coords = ant.getCoords();
-    int[] temp_coords = {(coords[0]+dir[0]+cols)%cols,(coords[1]+dir[1]+rows)%rows};
+    int[] temp_coords =
+    {
+      (coords[0]+dir[0]+cols)%cols,
+      (coords[1]+dir[1]+rows)%rows
+    };
+    
     return temp_coords;
   }
 
@@ -62,7 +80,7 @@ class AntGroup extends Group<Ant>
     if(_board.set(temp_coords[0],temp_coords[1],ANT_NUM) == false)
       return;
 
-    ant.setPosition(offset[0]+size*temp_coords[0],offset[1]+size*temp_coords[1]);
+    ant.setCoords(temp_coords,offset);
 
     _board.clear(coords[0],coords[1]);
   }
@@ -71,9 +89,6 @@ class AntGroup extends Group<Ant>
   {
     if(gameLoop.getFrame()==0)
     {
-      int cols = _board.getCols();
-      int rows = _board.getRows();
-
       ArrayList<Ant> ants = getObjects();
 
       int size = ants.size();
@@ -81,9 +96,12 @@ class AntGroup extends Group<Ant>
       {
         Ant a = ants.get(i);
           
-        int[] temp_coords = getTempCoords(a);
+        //int[] temp_coords = getTempCoords(a);
 
-        if(_board.get(temp_coords[0],temp_coords[1]) == AIR_NUM)
+        int[] eyes = getEyes(a);
+
+        //if(_board.get(temp_coords[0],temp_coords[1]) == AIR_NUM)
+        if(eyes[0] == AIR_NUM)
         {
           walk(a);
         }
@@ -92,8 +110,8 @@ class AntGroup extends Group<Ant>
           a.turnLeft();
         }
       }
-      
-       _board.update();
+
+      _board.update();
     }
    
 

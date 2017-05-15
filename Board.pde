@@ -53,8 +53,8 @@ class Board
   void update()
   {
     //set grid to buffer
-    for(int i = 0; i < _cols; i++)
-      for(int j = 0; j < _rows; j++)
+    for(int i = 0; i < _grid.length; i++)
+      for(int j = 0; j < _grid[0].length; j++)
         _grid[i][j] = _buffer[i][j];
   }
 
@@ -66,6 +66,9 @@ class Board
   boolean set(int x, int y, int type)
   {
     if(_grid[x][y] != AIR_NUM)
+      return false;
+    
+    if(_buffer[x][y] != AIR_NUM)
       return false;
       
     _buffer[x][y] = type;
@@ -98,9 +101,9 @@ class Board
 
   int[][] getBuffer()
   {
-    int[][] out = new int[_grid.length][_grid[0].length];
-    for(int i = 0; i < _grid.length; i++)
-      for(int j = 0; j < _grid[0].length; j++)
+    int[][] out = new int[_buffer.length][_buffer[0].length];
+    for(int i = 0; i < _buffer.length; i++)
+      for(int j = 0; j < _buffer[0].length; j++)
         out[i][j] = _buffer[i][j];
     return out;
   }

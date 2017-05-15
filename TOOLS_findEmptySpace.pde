@@ -7,7 +7,7 @@ int[] findEmptySpace(int x, int y, int[][] grid)
   for(int k = 0; k < 4; k++)
   {
     int r = floor(random(4));
-    int[] dir = getDir(r);
+    int[] dir = lookingAt(r);
 
     int temp_x = (x + dir[0] + cols)%cols;
     int temp_y = (y + dir[1] + rows)%rows;

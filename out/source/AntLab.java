@@ -110,6 +110,17 @@ class Ant extends Being
     return out;
   }
 
+  public void setCoords(int[] coords, int[] offset)
+  {
+    setPosition(
+      offset[0]+_size*coords[0],
+      offset[1]+_size*coords[1]
+    );
+
+    _x = coords[0];
+    _y = coords[1];
+  }
+
   public float getSize()
   {
     return _size;
@@ -137,7 +148,7 @@ class Ant extends Being
     fill(generateColor(_c));
 		_shape.draw();
 
-    int[] dir = getDir(_d);
+    int[] dir = lookingAt(_d);
     int temp_size = floor(_size/4);
     int offset = floor(_size-temp_size)/2;
     int temp_x = temp_size*dir[0]*1;
@@ -187,13 +198,31 @@ class AntGroup extends Group<Ant>
       }
   }
 
+  public int[] getEyes(Ant ant)
+  {
+    int[] out = new int[3];
+
+    int[][] eyes = {{0,-1},{-1,0},{1,0}};
+
+    int[] temp_coords = getTempCoords(ant);
+    out[0] = _board.get(temp_coords[0],temp_coords[1]);
+    out[1] = out[0];
+    out[2] = out[0];
+    return out;
+  }
+
   public int[] getTempCoords(Ant ant)
   {
     int cols = _board.getCols();
     int rows = _board.getRows();
-    int[] dir = getDir(ant.getDirection());
+    int[] dir = lookingAt(ant.getDirection());
     int[] coords = ant.getCoords();
-    int[] temp_coords = {(coords[0]+dir[0]+cols)%cols,(coords[1]+dir[1]+rows)%rows};
+    int[] temp_coords =
+    {
+      (coords[0]+dir[0]+cols)%cols,
+      (coords[1]+dir[1]+rows)%rows
+    };
+    
     return temp_coords;
   }
 
@@ -203,17 +232,14 @@ class AntGroup extends Group<Ant>
     int rows = _board.getRows();
 
     int[] offset = calcOffset(cols,rows);
-    //int[] dir = getDir(ant.getDirection());
     int[] coords = ant.getCoords();
     float size = ant.getSize();
-    /*int temp_x = (coords[0]+dir[0]+cols)%cols;
-    int temp_y = (coords[1]+dir[1]+rows)%rows;*/
     int[] temp_coords = getTempCoords(ant);
 
     if(_board.set(temp_coords[0],temp_coords[1],ANT_NUM) == false)
       return;
 
-    ant.setPosition(offset[0]+size*temp_coords[0],offset[1]+size*temp_coords[1]);
+    ant.setCoords(temp_coords,offset);
 
     _board.clear(coords[0],coords[1]);
   }
@@ -222,9 +248,6 @@ class AntGroup extends Group<Ant>
   {
     if(gameLoop.getFrame()==0)
     {
-      int cols = _board.getCols();
-      int rows = _board.getRows();
-
       ArrayList<Ant> ants = getObjects();
 
       int size = ants.size();
@@ -232,13 +255,12 @@ class AntGroup extends Group<Ant>
       {
         Ant a = ants.get(i);
           
-        //int[] dir = getDir(a.getDirection());
-        //int[] coord = a.getCoords();
-        //int temp_x = floor(coord[0]+dir[0]+cols)%cols;
-        //int temp_y = floor(coord[1]+dir[1]+rows)%rows;
-        int[] temp_coords = getTempCoords(a);
+        //int[] temp_coords = getTempCoords(a);
 
-        if(_board.get(temp_coords[0],temp_coords[1]) == AIR_NUM)
+        int[] eyes = getEyes(a);
+
+        //if(_board.get(temp_coords[0],temp_coords[1]) == AIR_NUM)
+        if(eyes[0] == AIR_NUM)
         {
           walk(a);
         }
@@ -247,8 +269,8 @@ class AntGroup extends Group<Ant>
           a.turnLeft();
         }
       }
-      
-       _board.update();
+
+      _board.update();
     }
    
 
@@ -332,8 +354,8 @@ class Board
   public void update()
   {
     //set grid to buffer
-    for(int i = 0; i < _cols; i++)
-      for(int j = 0; j < _rows; j++)
+    for(int i = 0; i < _grid.length; i++)
+      for(int j = 0; j < _grid[0].length; j++)
         _grid[i][j] = _buffer[i][j];
   }
 
@@ -345,6 +367,9 @@ class Board
   public boolean set(int x, int y, int type)
   {
     if(_grid[x][y] != AIR_NUM)
+      return false;
+    
+    if(_buffer[x][y] != AIR_NUM)
       return false;
       
     _buffer[x][y] = type;
@@ -377,9 +402,9 @@ class Board
 
   public int[][] getBuffer()
   {
-    int[][] out = new int[_grid.length][_grid[0].length];
-    for(int i = 0; i < _grid.length; i++)
-      for(int j = 0; j < _grid[0].length; j++)
+    int[][] out = new int[_buffer.length][_buffer[0].length];
+    for(int i = 0; i < _buffer.length; i++)
+      for(int j = 0; j < _buffer[0].length; j++)
         out[i][j] = _buffer[i][j];
     return out;
   }
@@ -432,10 +457,10 @@ class MapWorld extends World
     register(background);
     WallGroup wallGroup = new WallGroup(this,board);
     register(wallGroup);
-    AntGroup antGroup = new AntGroup(this,board);
-    register(antGroup);
     ShadowGroup shadowGroup = new ShadowGroup(this,board);
     register(shadowGroup);
+    AntGroup antGroup = new AntGroup(this,board);
+    register(antGroup);
   }
 
   public void preUpdate()
@@ -446,7 +471,7 @@ class MapWorld extends World
   public void postUpdate()
   {
     gameLoop.update();
-    //println("POSTUPDATE: "+beings_counter+" Beings exist.");
+    println("POSTUPDATE: "+beings_counter+" Beings exist.");
   }
 }
 /**
@@ -472,16 +497,15 @@ class Shadow extends Being
 
   public void draw()
   {
-   /* int max = gameLoop.getMax();
+    int max = gameLoop.getMax();
     int frame = gameLoop.getFrame()+1;
     float max_size = _size/2;
-    float multiplier = sin(((PI/2)*frame)/max);
+    float multiplier = cos(((PI/2)*frame)/max);
     int temp_size = floor(max_size*multiplier);
     int offset = floor(_size - temp_size)/2;
 		noStroke();
     fill(generateColor(_dot_color));
     rect(offset,offset,temp_size,temp_size);
-    */
   }
 }
 /**
@@ -527,7 +551,7 @@ class ShadowGroup extends Group<Shadow>
   private void readFromBoard()
   {
     World w = getWorld();
-    int[][] grid = _board.getBuffer();
+    int[][] grid = _board.getGrid();
 
     int cols = grid.length;
     int rows = grid[0].length;
@@ -556,12 +580,22 @@ class ShadowGroup extends Group<Shadow>
   {
     if(gameLoop.getFrame()==0)
     {
-      clear();
+      destroy();
       readFromBoard();
     }
 
     beings_counter += size();
   }
+}
+public int[] calcOffset(int cols, int rows)
+{
+  int size = min(WINDOW_WIDTH/cols,WINDOW_HEIGHT/rows);
+  int[] out = {
+    (WINDOW_WIDTH-size*cols)/2,
+    (WINDOW_HEIGHT-size*rows)/2
+  };
+
+  return out;
 }
 public int[] findEmptySpace(int x, int y, int[][] grid)
 {
@@ -572,7 +606,7 @@ public int[] findEmptySpace(int x, int y, int[][] grid)
   for(int k = 0; k < 4; k++)
   {
     int r = floor(random(4));
-    int[] dir = getDir(r);
+    int[] dir = lookingAt(r);
 
     int temp_x = (x + dir[0] + cols)%cols;
     int temp_y = (y + dir[1] + rows)%rows;
@@ -616,13 +650,43 @@ public int generateColor(boolean c[])
 
   return colors[PApplet.parseInt(c[0])][PApplet.parseInt(c[1])][PApplet.parseInt(c[2])];
 }
-public int[] getDir(int k)
+public int[][] getDir(int k)
 {
   check(k >= 0 && k < 4);
 
-  int[][] dir = {{0,-1},{1,0},{0,1},{-1,0}};
+  //int[][] dir = {{0,-1},{1,0},{0,1},{-1,0}};
+  int mat[][][] = {
+      {
+        {1,0},
+        {0,1}
+      },
+      {
+        {0,-1},
+        {1,0}
+      },
+      {
+        {-1,0},
+        {0,-1}
+      },
+      {
+        {0,1},
+        {-1,0}
+      }
+    };
   
-  return dir[k];
+  return mat[k];
+}
+
+public int[] lookingAt(int k)
+{
+  int[][] dir = getDir(k);
+  int[] view = {0,-1};
+  int[] out = 
+  {
+    view[0]*dir[0][0]+view[1]*dir[0][1],
+    view[0]*dir[1][0]+view[1]*dir[1][1]
+  };
+  return out;
 }
 public int randomFromPool(float[] chances)
 {
@@ -785,17 +849,6 @@ public HRectangle createSquareShape(int x, int y, int cols, int rows)
   );
 
   return new HRectangle(offset[0]+pos_x, offset[1]+pos_y, size, size);
-}
-
-public int[] calcOffset(int cols, int rows)
-{
-  int size = min(WINDOW_WIDTH/cols,WINDOW_HEIGHT/rows);
-  int[] out = {
-    (WINDOW_WIDTH-size*cols)/2,
-    (WINDOW_HEIGHT-size*rows)/2
-  };
-
-  return out;
 }
   public void settings() {  size(600, 600); }
   static public void main(String[] passedArgs) {

@@ -21,15 +21,14 @@ class Shadow extends Being
 
   public void draw()
   {
-   /* int max = gameLoop.getMax();
+    int max = gameLoop.getMax();
     int frame = gameLoop.getFrame()+1;
     float max_size = _size/2;
-    float multiplier = sin(((PI/2)*frame)/max);
+    float multiplier = cos(((PI/2)*frame)/max);
     int temp_size = floor(max_size*multiplier);
     int offset = floor(_size - temp_size)/2;
 		noStroke();
     fill(generateColor(_dot_color));
     rect(offset,offset,temp_size,temp_size);
-    */
   }
 }

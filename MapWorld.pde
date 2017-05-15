@@ -20,10 +20,10 @@ class MapWorld extends World
     register(background);
     WallGroup wallGroup = new WallGroup(this,board);
     register(wallGroup);
-    AntGroup antGroup = new AntGroup(this,board);
-    register(antGroup);
     ShadowGroup shadowGroup = new ShadowGroup(this,board);
     register(shadowGroup);
+    AntGroup antGroup = new AntGroup(this,board);
+    register(antGroup);
   }
 
   void preUpdate()
@@ -34,6 +34,6 @@ class MapWorld extends World
   void postUpdate()
   {
     gameLoop.update();
-    //println("POSTUPDATE: "+beings_counter+" Beings exist.");
+    println("POSTUPDATE: "+beings_counter+" Beings exist.");
   }
 }

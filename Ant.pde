@@ -28,6 +28,17 @@ class Ant extends Being
     return out;
   }
 
+  public void setCoords(int[] coords, int[] offset)
+  {
+    setPosition(
+      offset[0]+_size*coords[0],
+      offset[1]+_size*coords[1]
+    );
+
+    _x = coords[0];
+    _y = coords[1];
+  }
+
   public float getSize()
   {
     return _size;
@@ -55,7 +66,7 @@ class Ant extends Being
     fill(generateColor(_c));
 		_shape.draw();
 
-    int[] dir = getDir(_d);
+    int[] dir = lookingAt(_d);
     int temp_size = floor(_size/4);
     int offset = floor(_size-temp_size)/2;
     int temp_x = temp_size*dir[0]*1;
